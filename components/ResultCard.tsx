@@ -23,36 +23,34 @@ interface ResultCardProps {
 }
 
 export default function ResultCard({
-  score,
-  attempts,
-  answer,
-  streak,
-  challengeNumber,
-  shutterOriginal,
-  apertureOriginal,
-  focalOriginal,
-  description,
-  credit,
-  solveRate,
+  score, attempts, answer, streak, challengeNumber,
+  shutterOriginal, apertureOriginal, focalOriginal,
+  description, credit, solveRate,
 }: ResultCardProps) {
   const [displayScore, setDisplayScore] = useState(0);
-  const [downloading, setDownloading] = useState(false);
+  const [flashed, setFlashed]           = useState(false);
+  const [downloading, setDownloading]   = useState(false);
   const animatedRef = useRef(false);
 
-  // Count up score on mount
+  // Score count-up with ease-out cubic, then flash at the end
   useEffect(() => {
     if (animatedRef.current) return;
     animatedRef.current = true;
 
-    const duration = 800;
+    const duration = 900;
     const start = performance.now();
+
     function step(now: number) {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
+      const progress = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplayScore(Math.round(eased * score));
-      if (progress < 1) requestAnimationFrame(step);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        // Brief flash when count lands
+        setTimeout(() => setFlashed(true), 60);
+        setTimeout(() => setFlashed(false), 400);
+      }
     }
     requestAnimationFrame(step);
   }, [score]);
@@ -65,20 +63,9 @@ export default function ResultCard({
     const rows = attempts
       .map((a) => `${DOT[a.feedback.shutter]}${DOT[a.feedback.aperture]}${DOT[a.feedback.focal]}`)
       .join("\n");
-
-    const streakLine = streak.currentStreak > 1
-      ? `🔥 ${streak.currentStreak} frames straight`
-      : "";
-
-    return [
-      `📸 PICCLE — Frame ${challengeNumber}`,
-      rows,
-      `${score}/1000  ${tier.tier}`,
-      streakLine,
-      "piccle.app",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const streakLine = streak.currentStreak > 1 ? `🔥 ${streak.currentStreak} frames straight` : "";
+    return [`📸 PICCLE — Frame ${challengeNumber}`, rows, `${score}/1000  ${tier.tier}`, streakLine, "piccle.app"]
+      .filter(Boolean).join("\n");
   }
 
   async function handleShareText() {
@@ -87,19 +74,13 @@ export default function ResultCard({
       await navigator.share({ text });
     } else {
       await navigator.clipboard.writeText(text);
-      alert("Result copied to clipboard!");
     }
   }
 
   async function handleDownloadImage() {
     setDownloading(true);
     try {
-      const blob = await generateShareCard({
-        attempts,
-        score,
-        challengeNumber,
-        streak: streak.currentStreak,
-      });
+      const blob = await generateShareCard({ attempts, score, challengeNumber, streak: streak.currentStreak });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -116,82 +97,97 @@ export default function ResultCard({
   return (
     <motion.div
       className="result-card"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 200, damping: 25 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
     >
-      {/* Score */}
-      <div className="result-score">{displayScore}</div>
-      <div className="result-score-label">out of 1000</div>
+      {/* ── Score ── */}
+      <div className="result-score-block">
+        <motion.div
+          className="result-score"
+          animate={flashed ? { color: "#ffffff" } : { color: "var(--hot-pixel)" }}
+          transition={{ duration: 0.15 }}
+        >
+          {displayScore}
+        </motion.div>
+        <div className="result-score-label">out of 1000</div>
+        <span className={`skill-tier-badge${tier.isMaster ? " skill-tier-badge--master" : ""}`}>
+          {tier.tier}
+        </span>
+      </div>
 
-      {/* Skill tier badge */}
-      <span className={`skill-tier-badge${tier.isMaster ? " skill-tier-badge--master" : ""}`}>
-        {tier.tier}
-      </span>
-
-      {/* Streak */}
+      {/* ── Streak ── */}
       {streak.currentStreak >= 2 ? (
-        <div className="result-streak">
-          🔥 {streak.currentStreak} frames straight
+        <div className="result-streak-row">
+          <span style={{ fontSize: 18 }}>🔥</span>
+          <span className="result-streak">{streak.currentStreak} frames straight</span>
           {streak.longestStreak > streak.currentStreak && (
-            <span className="result-streak-longest">
-              · longest: {streak.longestStreak}
-            </span>
+            <span className="result-streak-longest">· longest: {streak.longestStreak}</span>
           )}
         </div>
       ) : streak.currentStreak === 0 ? (
         <div className="result-streak-reset">streak reset</div>
       ) : null}
 
-      {/* Today's settings */}
-      <div className="result-answer">
-        <div className="result-answer-title">Today&apos;s settings</div>
-        <div className="result-answer-values">
-          <div className="result-answer-item">
-            <span className="rai-label">Shutter</span>
-            <span className="rai-value" style={{ fontFamily: "var(--font-mono)" }}>{answer.shutter}</span>
+      {/* ── Settings reveal ── */}
+      <motion.div
+        className="result-settings-block"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1,  y: 0 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
+      >
+        <div className="result-settings-label">Today&apos;s settings</div>
+        <div className="result-settings-values">
+          <div className="result-setting-item">
+            <span className="rsi-value">{answer.shutter}</span>
+            <span className="rsi-label">Shutter</span>
             {shutterOriginal && shutterOriginal !== answer.shutter && (
-              <span className="rai-original">EXIF: {shutterOriginal}</span>
+              <span className="rsi-original">EXIF {shutterOriginal}</span>
             )}
           </div>
-          <div className="result-answer-item">
-            <span className="rai-label">Aperture</span>
-            <span className="rai-value" style={{ fontFamily: "var(--font-mono)" }}>{answer.aperture}</span>
+          <div className="result-setting-item">
+            <span className="rsi-value">{answer.aperture}</span>
+            <span className="rsi-label">Aperture</span>
             {apertureOriginal && apertureOriginal !== answer.aperture && (
-              <span className="rai-original">EXIF: {apertureOriginal}</span>
+              <span className="rsi-original">EXIF {apertureOriginal}</span>
             )}
           </div>
-          <div className="result-answer-item">
-            <span className="rai-label">Focal</span>
-            <span className="rai-value" style={{ fontFamily: "var(--font-mono)" }}>{answer.focal}mm</span>
+          <div className="result-setting-item">
+            <span className="rsi-value">{answer.focal}mm</span>
+            <span className="rsi-label">Focal</span>
             {focalOriginal !== undefined && focalOriginal !== answer.focal && (
-              <span className="rai-original">EXIF: {focalOriginal}mm</span>
+              <span className="rsi-original">EXIF {focalOriginal}mm</span>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Explanation */}
+      {/* ── Explanation ── */}
       {explanation && (
-        <p className="result-explanation">{explanation}</p>
+        <motion.div
+          className="result-explanation-block"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.0, duration: 0.5 }}
+        >
+          <p className="result-explanation">{explanation}</p>
+        </motion.div>
       )}
 
-      {/* Photographer credit */}
-      {credit && (
-        <p className="result-credit">Photo by {credit}</p>
+      {/* ── Credit + solve rate ── */}
+      {(credit || solveRate !== undefined) && (
+        <div className="result-meta-block">
+          {credit && <span className="result-credit">Photo by {credit}</span>}
+          {solveRate !== undefined && (
+            <span className={`solve-rate${solveRate < 30 ? " solve-rate--rare" : ""}`}>
+              {solveRate < 30 ? `only ${solveRate}% solved` : `${solveRate}% solved`}
+            </span>
+          )}
+        </div>
       )}
 
-      {/* Solve rate */}
-      {solveRate !== undefined && (
-        <p className={`solve-rate${solveRate < 30 ? " solve-rate--rare" : ""}`}>
-          {solveRate < 30
-            ? `Only ${solveRate}% of players solved today`
-            : `${solveRate}% of players solved today`}
-        </p>
-      )}
-
-      {/* Share buttons */}
-      <div className="share-buttons">
+      {/* ── Actions ── */}
+      <div className="result-actions">
         <motion.button
           className="share-btn"
           onClick={handleShareText}

@@ -22,13 +22,8 @@ export default function ImageViewer({
 }: ImageViewerProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const metaLine = [
-    camera,
-    iso ? `ISO ${iso}` : undefined,
-    photographer ? `${photographer}` : undefined,
-  ]
-    .filter(Boolean)
-    .join("  ·  ");
+  // Camera spec line: "Sony A7C II · ISO 400"
+  const specLine = [camera, iso ? `ISO ${iso}` : null].filter(Boolean).join("  ·  ");
 
   return (
     <>
@@ -39,16 +34,22 @@ export default function ImageViewer({
           alt={`Frame ${challengeNumber}`}
           className="challenge-image"
         />
+
         <div className="image-overlay">
           <div className="overlay-top">
+            {/* Frame number — top left, understated */}
             <span className="challenge-badge">Frame {challengeNumber}</span>
           </div>
+
           <div className="overlay-bottom">
-            {metaLine && (
-              <div className="photo-meta-overlay">
-                <span className="photo-meta-line">{metaLine}</span>
-              </div>
-            )}
+            <div className="photo-meta-overlay">
+              {specLine && (
+                <span className="photo-meta-camera">{specLine}</span>
+              )}
+              {photographer && (
+                <span className="photo-meta-credit">{photographer}</span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -60,19 +61,22 @@ export default function ImageViewer({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={() => setExpanded(false)}
           >
             <motion.img
               src={imageUrl}
               alt={`Frame ${challengeNumber}`}
               className="lightbox-image"
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              initial={{ scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1,    opacity: 1 }}
+              exit={{ scale: 0.94, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 280, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
             />
-            {credit && <p className="lightbox-credit">Photo: {credit}</p>}
+            {credit && (
+              <p className="lightbox-credit">Photo: {credit}</p>
+            )}
             <button className="lightbox-close" onClick={() => setExpanded(false)}>
               ✕
             </button>
