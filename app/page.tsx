@@ -82,7 +82,7 @@ export default function Home() {
 
   useEffect(() => {
     fetch("/api/daily")
-      .then((r) => r.json())
+      .then((r) => { if (!r.ok) throw new Error("no challenge"); return r.json(); })
       .then((data: DailyData) => setDaily(data))
       .catch(() => setLoadError(true));
   }, []);

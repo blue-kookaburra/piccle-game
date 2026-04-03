@@ -23,20 +23,8 @@ export async function POST(req: NextRequest) {
     focalOriginal?: number;
   } | null = null;
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    // Test-data path
-    const test = getTestChallenge(date);
-    if (!test) return NextResponse.json({ error: "No challenge for date" }, { status: 404 });
-    answer = { shutter: test.shutter, aperture: test.aperture, focal: test.focal };
-    revealData = {
-      description: test.description,
-      credit: test.credit,
-      shutterOriginal: test.shutterOriginal,
-      apertureOriginal: test.apertureOriginal,
-      focalOriginal: test.focalOriginal,
-    };
-  } else {
-    // Supabase path
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    // Supabase path — try to load from DB, fall back to test data if not found
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
 
@@ -51,29 +39,37 @@ export async function POST(req: NextRequest) {
       .eq("date", date)
       .single();
 
-    if (error || !data?.images) {
-      return NextResponse.json({ error: "No challenge for date" }, { status: 404 });
+    if (!error && data?.images) {
+      const img = (Array.isArray(data.images) ? data.images[0] : data.images) as {
+        shutter_speed: string;
+        aperture: string;
+        focal_length: number;
+        description: string;
+        credit: string;
+        shutter_speed_original?: string;
+        focal_length_original?: number;
+      };
+      answer = { shutter: img.shutter_speed, aperture: img.aperture, focal: img.focal_length };
+      revealData = {
+        description: img.description,
+        credit: img.credit,
+        shutterOriginal: img.shutter_speed_original,
+        focalOriginal: img.focal_length_original,
+      };
     }
+  }
 
-    const img = (Array.isArray(data.images) ? data.images[0] : data.images) as {
-      shutter_speed: string;
-      aperture: string;
-      focal_length: number;
-      description: string;
-      credit: string;
-      camera?: string;
-      iso?: number;
-      photographer?: string;
-      location?: string;
-      shutter_speed_original?: string;
-      focal_length_original?: number;
-    };
-    answer = { shutter: img.shutter_speed, aperture: img.aperture, focal: img.focal_length };
+  // Fall back to test data (no Supabase configured, or no challenge in DB for this date)
+  if (!answer) {
+    const test = getTestChallenge(date);
+    if (!test) return NextResponse.json({ error: "No challenge for date" }, { status: 404 });
+    answer = { shutter: test.shutter, aperture: test.aperture, focal: test.focal };
     revealData = {
-      description: img.description,
-      credit: img.credit,
-      shutterOriginal: img.shutter_speed_original,
-      focalOriginal: img.focal_length_original,
+      description: test.description,
+      credit: test.credit,
+      shutterOriginal: test.shutterOriginal,
+      apertureOriginal: test.apertureOriginal,
+      focalOriginal: test.focalOriginal,
     };
   }
 
@@ -93,13 +89,11 @@ export async function POST(req: NextRequest) {
       const { createClient } = await import("@/lib/supabase/server");
       const supabase = await createClient();
 
-      // Upsert play count; increment solve if correct
       await supabase.rpc("increment_daily_stats", {
         p_date: date,
         p_solved: feedback.isCorrect ? 1 : 0,
       });
 
-      // Read back the current rate
       const { data: statsRow } = await supabase
         .from("daily_stats")
         .select("total_plays, total_solves")

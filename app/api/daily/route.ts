@@ -33,7 +33,21 @@ export async function GET() {
     .single();
 
   if (error || !data) {
-    return NextResponse.json({ error: "No challenge today" }, { status: 404 });
+    // No challenge scheduled in Supabase — fall back to test data so the app
+    // always shows something playable even before challenges are uploaded.
+    const { getTestChallenge } = await import("@/lib/test-data");
+    const test = getTestChallenge(today);
+    if (!test) return NextResponse.json({ error: "No challenge today" }, { status: 404 });
+    return NextResponse.json({
+      imageUrl: test.imageUrl,
+      challengeNumber: test.challengeNumber,
+      challengeDate: test.challengeDate,
+      camera: test.camera,
+      iso: test.iso,
+      photographer: test.photographer,
+      description: test.description,
+      credit: test.credit,
+    });
   }
 
   const image = (Array.isArray(data.images) ? data.images[0] : data.images) as {
