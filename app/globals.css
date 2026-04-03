@@ -81,14 +81,11 @@ body {
   flex-shrink: 0;
 }
 
-.game-title {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 22px;
+.game-logo {
+  height: 40px;
+  width: 40px;
   color: var(--hot-pixel);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  line-height: 1;
+  flex-shrink: 0;
 }
 
 .header-right {
@@ -399,12 +396,12 @@ body {
 }
 
 .attempts-remaining {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--zone-mid);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--zone-7);
   text-align: center;
+  font-optical-sizing: auto;
 }
 
 .camera-controls {
@@ -447,11 +444,14 @@ body {
 
 .dial-label {
   font-family: var(--font-mono);
-  font-size: 7px;
-  letter-spacing: 0.2em;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--zone-mid);
-  line-height: 1;
+  color: var(--zone-7);
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
 }
 
 .dial-value-row {
@@ -465,7 +465,7 @@ body {
 .dial-arrow {
   background: transparent;
   border: none;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   font-size: 20px;
   line-height: 1;
   padding: 4px;
@@ -487,7 +487,7 @@ body {
 
 .dial-value {
   font-family: var(--font-mono);
-  font-size: clamp(13px, 3.4vw, 16px);
+  font-size: clamp(15px, 4vw, 18px);
   font-weight: 700;
   color: var(--zone-9);
   letter-spacing: 0.02em;
@@ -569,11 +569,11 @@ body {
 }
 
 .result-score-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--zone-mid);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--zone-7);
+  font-optical-sizing: auto;
 }
 
 .skill-tier-badge {

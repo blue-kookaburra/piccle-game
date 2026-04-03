@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(cp \"C:\\\\Users\\\\aaant\\\\OneDrive\\\\Desktop\\\\shutter-shaper\\\\link.xlsx\" \"C:\\\\Users\\\\aaant\\\\AppData\\\\Local\\\\Temp\\\\link.xlsx\")",
+      "Bash(python3 -c \":*)",
+      "WebFetch(domain:unsplash.com)",
+      "WebSearch",
+      "WebFetch(domain:api.unsplash.com)",
+      "Bash(curl -s http://localhost:3000/api/daily)",
+      "Bash(curl -sI \"https://images.unsplash.com/photo-qSHMHyjL0Fc?w=1200&q=80\")",
+      "Bash(node -e \"require\\(''@supabase/supabase-js''\\)\")",
+      "Bash(cd:*)"
+    ]
+  }
+}

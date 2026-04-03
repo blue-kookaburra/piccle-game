@@ -11,30 +11,34 @@ const FEEDBACK_COLOR: Record<"green" | "yellow" | "red", string> = {
 };
 
 // ─── Half-dial SVG ───────────────────────────────────────────────────────────
+//
+// Tick count = number of selectable values for that setting.
+// majorEvery = how often a tick is "major":
+//   shutter speed / focal length: every 2nd  (alternating)
+//   aperture:                     every 3rd  (1/3-stop spacing; full stops land every 3rd)
 
 interface HalfDialProps {
   index: number;
   total: number;
   uid: string;
+  majorEvery: number;
   feedback?: "green" | "yellow" | "red";
 }
 
-function HalfDial({ index, total, uid, feedback }: HalfDialProps) {
-  const TICKS       = 60;
-  const MAJOR_EVERY = 5;
-  const R_BODY      = 56;
-  const R_TICK_OUT  = 51;
-  const R_MINOR_IN  = 45;
-  const R_MAJOR_IN  = 40;
+function HalfDial({ index, total, uid, majorEvery, feedback }: HalfDialProps) {
+  const R_BODY     = 56;
+  const R_TICK_OUT = 51;
+  const R_MINOR_IN = 46;
+  const R_MAJOR_IN = 40;
 
-  // One full 360° revolution across the full range
-  const rotDeg = (index / total) * 360;
+  // One full 360° revolution maps across the full range of values
+  const rotDeg       = (index / total) * 360;
   const indicatorColor = feedback ? FEEDBACK_COLOR[feedback] : "#ff4800";
-  const clipId = `dial-clip-${uid}`;
+  const clipId       = `dial-clip-${uid}`;
 
-  const ticks = Array.from({ length: TICKS }, (_, i) => {
-    const angle   = ((i / TICKS) * 2 * Math.PI) - Math.PI / 2;
-    const isMajor = i % MAJOR_EVERY === 0;
+  const ticks = Array.from({ length: total }, (_, i) => {
+    const angle   = ((i / total) * 2 * Math.PI) - Math.PI / 2;
+    const isMajor = i % majorEvery === 0;
     const rIn     = isMajor ? R_MAJOR_IN : R_MINOR_IN;
     return {
       x1: Math.cos(angle) * rIn,
@@ -57,21 +61,20 @@ function HalfDial({ index, total, uid, feedback }: HalfDialProps) {
         <clipPath id={clipId}>
           <rect x="-62" y="-62" width="124" height="60" />
         </clipPath>
-        {/* Radial gradient for dial depth */}
         <radialGradient id={`grad-${uid}`} cx="40%" cy="35%" r="65%">
           <stop offset="0%"   stopColor="#2a2520" />
           <stop offset="100%" stopColor="#0e0b09" />
         </radialGradient>
       </defs>
 
-      {/* Dial body with depth gradient */}
+      {/* Dial body */}
       <circle
         cx="0" cy="0" r={R_BODY}
         fill={`url(#grad-${uid})`}
         clipPath={`url(#${clipId})`}
       />
 
-      {/* Tick marks — rotate with the dial */}
+      {/* Rotating tick marks */}
       <g
         style={{
           transform: `rotate(${rotDeg}deg)`,
@@ -100,7 +103,7 @@ function HalfDial({ index, total, uid, feedback }: HalfDialProps) {
         clipPath={`url(#${clipId})`}
       />
 
-      {/* Indicator notch at 12 o'clock — changes color with feedback */}
+      {/* Indicator notch at 12 o'clock — colored by feedback */}
       <line
         x1="0" y1={-(R_BODY + 1)}
         x2="0" y2={-(R_MAJOR_IN - 2)}
@@ -123,6 +126,7 @@ interface DialPickerProps {
   index: number;
   total: number;
   uid: string;
+  majorEvery: number;
   onDecrement: () => void;
   onIncrement: () => void;
   disabled?: boolean;
@@ -130,7 +134,7 @@ interface DialPickerProps {
 }
 
 function DialPicker({
-  label, value, index, total, uid,
+  label, value, index, total, uid, majorEvery,
   onDecrement, onIncrement, disabled, feedback,
 }: DialPickerProps) {
   function step(dir: 1 | -1) {
@@ -173,7 +177,13 @@ function DialPicker({
         </button>
       </div>
 
-      <HalfDial index={index} total={total} uid={uid} feedback={feedback} />
+      <HalfDial
+        index={index}
+        total={total}
+        uid={uid}
+        majorEvery={majorEvery}
+        feedback={feedback}
+      />
     </div>
   );
 }
@@ -200,39 +210,44 @@ export default function CameraBody({
 }: CameraBodyProps) {
   return (
     <div className="camera-controls">
-      {/* Instrument panel */}
       <div className="dials-panel">
         <div className="dials-row">
+          {/* Shutter speed — all values are 1 full stop apart, so alternate major/minor */}
           <DialPicker
-            label="SHUTTER"
+            label="SHUTTER SPEED"
             value={SHUTTER_SPEEDS[shutterIdx]}
             index={shutterIdx}
             total={SHUTTER_SPEEDS.length}
             uid="shutter"
+            majorEvery={2}
             onDecrement={() => onShutterChange(shutterIdx - 1)}
             onIncrement={() => onShutterChange(shutterIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.shutter}
           />
           <div className="dial-divider" />
+          {/* Aperture — 1/3-stop increments, so every 3rd tick is a full stop */}
           <DialPicker
             label="APERTURE"
             value={APERTURES[apertureIdx]}
             index={apertureIdx}
             total={APERTURES.length}
             uid="aperture"
+            majorEvery={3}
             onDecrement={() => onApertureChange(apertureIdx - 1)}
             onIncrement={() => onApertureChange(apertureIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.aperture}
           />
           <div className="dial-divider" />
+          {/* Focal length — not even stops, so alternate major/minor */}
           <DialPicker
-            label="FOCAL"
+            label="FOCAL LENGTH"
             value={`${FOCAL_LENGTHS[focalIdx]}mm`}
             index={focalIdx}
             total={FOCAL_LENGTHS.length}
             uid="focal"
+            majorEvery={2}
             onDecrement={() => onFocalChange(focalIdx - 1)}
             onIncrement={() => onFocalChange(focalIdx + 1)}
             disabled={disabled}
@@ -241,7 +256,6 @@ export default function CameraBody({
         </div>
       </div>
 
-      {/* Shoot */}
       <motion.button
         className="shutter-btn"
         onClick={onFire}

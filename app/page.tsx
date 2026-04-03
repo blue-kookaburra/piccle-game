@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import PiccleLogo from "@/components/PiccleLogo";
 import ImageViewer from "@/components/ImageViewer";
 import CameraBody from "@/components/CameraBody";
 import AttemptHistory from "@/components/AttemptHistory";
@@ -205,7 +206,7 @@ export default function Home() {
   return (
     <main className="game-layout">
       <header className="game-header">
-        <h1 className="game-title">PICCLE</h1>
+        <PiccleLogo className="game-logo" />
         <div className="header-right">
           {streak.currentStreak > 0 && (
             <span className="streak-badge">🔥 {streak.currentStreak}</span>
