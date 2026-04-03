@@ -13,13 +13,13 @@ type FeedbackColor = "green" | "yellow" | "red";
 const DOT_COLOR: Record<FeedbackColor, string> = {
   green:  "#27ae60",
   yellow: "#c8952a",
-  red:    "transparent",
+  red:    "#c0392b",
 };
 
 const DOT_BORDER: Record<FeedbackColor, string> = {
   green:  "#27ae60",
   yellow: "#c8952a",
-  red:    "#4a3030",
+  red:    "#c0392b",
 };
 
 // Worst feedback in an attempt determines the row accent color
@@ -32,14 +32,10 @@ function rowAccent(attempt: Attempt): string {
 
 // Dots: filled square for green/yellow, open circle for wrong (BRAND.md spec)
 function Dot({ color }: { color: FeedbackColor }) {
-  const isWrong = color === "red";
   return (
     <span
-      className={isWrong ? "attempt-dot attempt-dot--empty" : "attempt-dot"}
-      style={{
-        background:   DOT_COLOR[color],
-        borderColor:  DOT_BORDER[color],
-      }}
+      className="attempt-dot"
+      style={{ background: DOT_COLOR[color], borderColor: DOT_BORDER[color] }}
     />
   );
 }

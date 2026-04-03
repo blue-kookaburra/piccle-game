@@ -261,11 +261,10 @@ export default function Home() {
               onFire={handleFire}
               disabled={completed || attempts.length >= MAX_ATTEMPTS}
               firing={firing}
+              attemptsLeft={shotsLeft}
+              shotKey={attempts.length}
               lastAttemptFeedback={attempts[attempts.length - 1]?.feedback}
             />
-            <p className="attempts-remaining">
-              {shotsLeft} {shotsLeft === 1 ? "shot" : "shots"} left
-            </p>
           </section>
         )}
       </div>

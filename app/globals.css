@@ -44,7 +44,8 @@
 
 /* ─── Reset ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
+/* Prevent mobile browser chrome from causing layout jumps on scroll */
+html { height: 100%; overflow: hidden; }
 
 /* ─── Base ──────────────────────────────────────────────────────── */
 body {
@@ -53,7 +54,8 @@ body {
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.5;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   /* Film grain — analog texture over the whole app */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
@@ -63,7 +65,10 @@ body {
 .game-layout {
   max-width: 480px;
   margin: 0 auto;
-  min-height: 100dvh;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom);
@@ -135,7 +140,7 @@ body {
 .image-container {
   position: relative;
   width: 100%;
-  height: 54dvh;
+  height: 54svh;
   min-height: 260px;
   overflow: hidden;
   cursor: zoom-in;
@@ -439,7 +444,14 @@ body {
   align-items: center;
   gap: 4px;
   flex: 1;
-  padding: 16px 6px 14px;
+  min-width: 0;
+  padding: 12px 4px 10px;
+}
+
+.dial-drag-zone {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .dial-label {
@@ -513,6 +525,25 @@ body {
   transition: opacity 0.15s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
   animation: shoot-pulse 2.8s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.shutter-btn-label {
+  flex: 1;
+  text-align: center;
+}
+
+.shutter-btn-count {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  opacity: 0.65;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0 16px 0 16px;
+  line-height: 1;
 }
 
 @keyframes shoot-pulse {
