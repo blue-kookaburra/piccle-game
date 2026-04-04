@@ -7,10 +7,11 @@ import ImageViewer from "@/components/ImageViewer";
 import CameraBody from "@/components/CameraBody";
 import AttemptHistory from "@/components/AttemptHistory";
 import ResultCard from "@/components/ResultCard";
+import AboutModal from "@/components/AboutModal";
 import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 import { getGameState, saveGameState, type Attempt } from "@/lib/game-state";
 import { getStreak, updateStreak, type StreakState } from "@/lib/streak";
-import type { AttemptFeedback } from "@/lib/scoring";
+import type { AttemptFeedback, FeedbackColor } from "@/lib/scoring";
 
 interface DailyData {
   imageUrl: string;
@@ -40,6 +41,15 @@ const MAX_ATTEMPTS = 5;
 const DEFAULT_SHUTTER = Math.floor(SHUTTER_SPEEDS.length / 2);
 const DEFAULT_APERTURE = Math.floor(APERTURES.length / 2);
 const DEFAULT_FOCAL = Math.floor(FOCAL_LENGTHS.length / 2);
+
+// Best colour seen so far for one setting across all past attempts
+function bestColor(attempts: Attempt[], key: "shutter" | "aperture" | "focal"): FeedbackColor {
+  const rank = (c: FeedbackColor) => c === "green" ? 2 : c === "yellow" ? 1 : 0;
+  return attempts.reduce<FeedbackColor>(
+    (best, a) => rank(a.feedback[key]) > rank(best) ? a.feedback[key] : best,
+    "red"
+  );
+}
 
 // Animate a dial index from current to target over ~800ms (slot-machine feel)
 function animateDial(
@@ -79,6 +89,7 @@ export default function Home() {
     lastPlayedDate: "",
   });
   const [firing, setFiring] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const dialAnimatedRef = useRef(false);
 
   useEffect(() => {
@@ -127,6 +138,11 @@ export default function Home() {
       aperture: APERTURES[apertureIdx],
       focal: FOCAL_LENGTHS[focalIdx],
       attemptNumber,
+      previousBestColors: attempts.length > 0 ? {
+        shutter:  bestColor(attempts, "shutter"),
+        aperture: bestColor(attempts, "aperture"),
+        focal:    bestColor(attempts, "focal"),
+      } : undefined,
     };
 
     try {
@@ -211,8 +227,19 @@ export default function Home() {
           {streak.currentStreak > 0 && (
             <span className="streak-badge">🔥 {streak.currentStreak}</span>
           )}
+          <button className="info-btn" onClick={() => setShowAbout(true)} aria-label="About Piccle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5"/>
+              <line x1="8" y1="7.5" x2="8" y2="11.5" strokeLinecap="round"/>
+              <circle cx="8" cy="4.75" r="0.85" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
           <Link href="/stats" className="stats-link" title="Your stats">
-            ◎
+            <svg width="18" height="16" viewBox="0 0 18 16" fill="currentColor" aria-hidden="true">
+              <rect x="0"  y="8" width="4" height="8" rx="1"/>
+              <rect x="7"  y="4" width="4" height="12" rx="1"/>
+              <rect x="14" y="0" width="4" height="16" rx="1"/>
+            </svg>
           </Link>
         </div>
       </header>
@@ -229,10 +256,6 @@ export default function Home() {
       </section>
 
       <div className="content-card">
-        <section className="history-section">
-          <AttemptHistory attempts={attempts} maxAttempts={MAX_ATTEMPTS} />
-        </section>
-
         {completed && answer ? (
           <section className="result-section">
             <ResultCard
@@ -267,7 +290,13 @@ export default function Home() {
             />
           </section>
         )}
+
+        <section className="history-section">
+          <AttemptHistory attempts={attempts} maxAttempts={MAX_ATTEMPTS} />
+        </section>
       </div>
+
+      <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
     </main>
   );
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { scoreAttempt } from "@/lib/scoring";
+import { scoreAttempt, type FeedbackColor } from "@/lib/scoring";
 import { getTestChallenge } from "@/lib/test-data";
 
 interface SubmitBody {
@@ -8,11 +8,12 @@ interface SubmitBody {
   aperture: string;
   focal: number;
   attemptNumber: number;
+  previousBestColors?: { shutter: string; aperture: string; focal: string };
 }
 
 export async function POST(req: NextRequest) {
   const body: SubmitBody = await req.json();
-  const { date, shutter, aperture, focal, attemptNumber } = body;
+  const { date, shutter, aperture, focal, attemptNumber, previousBestColors } = body;
 
   let answer: { shutter: string; aperture: string; focal: number } | null = null;
   let revealData: {
@@ -76,7 +77,8 @@ export async function POST(req: NextRequest) {
   const feedback = scoreAttempt(
     { shutter, aperture, focal },
     answer,
-    attemptNumber
+    attemptNumber,
+    previousBestColors as { shutter: FeedbackColor; aperture: FeedbackColor; focal: FeedbackColor } | undefined
   );
 
   const isLastAttempt = attemptNumber >= 5;
