@@ -87,8 +87,8 @@ body {
 }
 
 .game-logo {
-  height: 40px;
-  width: 40px;
+  height: 26px;
+  width: auto;
   color: var(--hot-pixel);
   flex-shrink: 0;
 }
