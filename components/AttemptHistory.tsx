@@ -10,18 +10,10 @@ interface AttemptHistoryProps {
 
 type FeedbackColor = "green" | "yellow" | "red";
 
-// New feedback colors — electric, vivid
-const DOT_COLOR: Record<FeedbackColor, string> = {
+const TEXT_COLOR: Record<FeedbackColor, string> = {
   green:  "#22ff88",
   yellow: "#ffb800",
   red:    "#ff4d5a",
-};
-
-// Per-parameter channel colors (empty dot outlines)
-const CHANNEL_COLOR: Record<"shutter" | "aperture" | "focal", string> = {
-  shutter:  "#00d4c8",  // cyan
-  aperture: "#ffb800",  // amber
-  focal:    "#ff5c6a",  // coral
 };
 
 // Worst feedback in an attempt determines the left-edge bar color
@@ -30,22 +22,6 @@ function rowAccent(attempt: Attempt): string {
   if (vals.includes("red"))    return "#ff4d5a";
   if (vals.includes("yellow")) return "#ffb800";
   return "#22ff88";
-}
-
-// Circle dot: filled with feedback color (circle outline = channel color for emphasis)
-function Dot({ color, channel }: { color: FeedbackColor; channel: "shutter" | "aperture" | "focal" }) {
-  const fill = DOT_COLOR[color];
-  const outline = CHANNEL_COLOR[channel];
-  return (
-    <span
-      className="attempt-dot"
-      style={{
-        background: fill,
-        boxShadow: `0 0 6px ${fill}80`,
-        border: `1.5px solid ${outline}`,
-      }}
-    />
-  );
 }
 
 export default function AttemptHistory({ attempts, maxAttempts = 5 }: AttemptHistoryProps) {
@@ -66,15 +42,9 @@ export default function AttemptHistory({ attempts, maxAttempts = 5 }: AttemptHis
           <span className="attempt-num">{i + 1}</span>
 
           <div className="attempt-settings">
-            <span className="attempt-setting" style={{ color: CHANNEL_COLOR.shutter + "cc" }}>{attempt.shutter}</span>
-            <span className="attempt-setting" style={{ color: CHANNEL_COLOR.aperture + "cc" }}>{attempt.aperture}</span>
-            <span className="attempt-setting" style={{ color: CHANNEL_COLOR.focal + "cc" }}>{attempt.focal}mm</span>
-          </div>
-
-          <div className="attempt-dots">
-            {(["shutter", "aperture", "focal"] as const).map((key) => (
-              <Dot key={key} color={attempt.feedback[key]} channel={key} />
-            ))}
+            <span className="attempt-setting" style={{ color: TEXT_COLOR[attempt.feedback.shutter] }}>{attempt.shutter}</span>
+            <span className="attempt-setting" style={{ color: TEXT_COLOR[attempt.feedback.aperture] }}>{attempt.aperture}</span>
+            <span className="attempt-setting" style={{ color: TEXT_COLOR[attempt.feedback.focal] }}>{attempt.focal}mm</span>
           </div>
 
           <span className={`attempt-pts${attempt.feedback.points === 0 ? " attempt-pts--zero" : ""}`}>
@@ -92,18 +62,9 @@ export default function AttemptHistory({ attempts, maxAttempts = 5 }: AttemptHis
         >
           <span className="attempt-num">{attempts.length + i + 1}</span>
           <div className="attempt-settings">
-            <span className="attempt-setting" style={{ color: "#21263a" }}>——</span>
-            <span className="attempt-setting" style={{ color: "#21263a" }}>——</span>
-            <span className="attempt-setting" style={{ color: "#21263a" }}>——</span>
-          </div>
-          <div className="attempt-dots">
-            {(["shutter", "aperture", "focal"] as const).map((key) => (
-              <span
-                key={key}
-                className="attempt-dot attempt-dot--empty"
-                style={{ border: `1.5px solid ${CHANNEL_COLOR[key]}40` }}
-              />
-            ))}
+            <span className="attempt-setting" style={{ color: "var(--zone-3)" }}>——</span>
+            <span className="attempt-setting" style={{ color: "var(--zone-3)" }}>——</span>
+            <span className="attempt-setting" style={{ color: "var(--zone-3)" }}>——</span>
           </div>
         </div>
       ))}

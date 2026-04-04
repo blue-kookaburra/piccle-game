@@ -11,11 +11,11 @@ const FEEDBACK_COLOR: Record<"green" | "yellow" | "red", string> = {
   red:    "#ff4d5a",
 };
 
-// Per-parameter projected-light accent colors
+// Per-parameter identity colors — deliberately distinct from G/Y/R feedback
 const DIAL_COLOR: Record<string, string> = {
-  shutter: "#00d4c8",   // cyan — time, motion, sky
-  aperture: "#ffb800",  // amber — light quantity, golden hour
-  focal: "#ff5c6a",     // coral — perspective, compression
+  shutter:  "#60a5fa",  // cornflower blue — sky, time, motion
+  aperture: "#c084fc",  // lilac/violet — light, depth
+  focal:    "#f9a8d4",  // blush pink — warmth, perspective
 };
 
 // ─── Half-dial SVG ───────────────────────────────────────────────────────────
@@ -186,9 +186,6 @@ function DialPicker({
     dragRef.current = null;
   }
 
-  // Active value color: feedback color if known, otherwise dial's signature color
-  const valueColor = feedback ? FEEDBACK_COLOR[feedback] : dialColor;
-
   return (
     <div className="dial-picker">
       <span className="dial-label" style={{ color: dialColor + "cc" }}>{label}</span>
@@ -207,7 +204,6 @@ function DialPicker({
           initial={{ opacity: 0.5, y: -4 }}
           animate={{ opacity: 1,   y:  0 }}
           transition={{ duration: 0.1 }}
-          style={{ color: valueColor }}
         >
           {value}
         </motion.span>
@@ -238,6 +234,32 @@ function DialPicker({
           dialColor={dialColor}
           feedback={feedback}
         />
+      </div>
+    </div>
+  );
+}
+
+// ─── Shot counter — mechanical rolling film counter window ───────────────────
+
+const MAX_SHOTS = 5;
+
+function ShotCounter({ value }: { value: number }) {
+  const DIGIT_H = 36; // px — height of each number slot
+  const digits = [5, 4, 3, 2, 1, 0];
+  // index 0 = showing 5, index 5 = showing 0
+  const idx = MAX_SHOTS - value;
+
+  return (
+    <div className="shot-counter-window" aria-label={`${value} shots remaining`}>
+      <div
+        className="shot-counter-strip"
+        style={{ transform: `translateY(${-idx * DIGIT_H}px)` }}
+      >
+        {digits.map((n) => (
+          <div key={n} className="shot-counter-digit">
+            {n}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -325,10 +347,14 @@ export default function CameraBody({
         disabled={disabled || firing}
         whileTap={{ scale: 0.975 }}
       >
-        {firing ? "—" : (
+        {firing ? (
+          <span className="shutter-btn-label">—</span>
+        ) : (
           <>
             <span className="shutter-btn-label">SHOOT</span>
-            <span className="shutter-btn-count">{attemptsLeft}</span>
+            <div className="shot-counter-section">
+              <ShotCounter value={attemptsLeft} />
+            </div>
           </>
         )}
       </motion.button>
