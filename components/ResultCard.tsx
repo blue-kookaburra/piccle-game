@@ -20,12 +20,13 @@ interface ResultCardProps {
   description?: string;
   credit?: string;
   solveRate?: number;
+  unsplashUrl?: string;
 }
 
 export default function ResultCard({
   score, attempts, answer, streak, challengeNumber,
   shutterOriginal, apertureOriginal, focalOriginal,
-  description, credit, solveRate,
+  description, credit, solveRate, unsplashUrl,
 }: ResultCardProps) {
   const [displayScore, setDisplayScore] = useState(0);
   const [flashed, setFlashed]           = useState(false);
@@ -177,7 +178,16 @@ export default function ResultCard({
       {/* ── Credit + solve rate ── */}
       {(credit || solveRate !== undefined) && (
         <div className="result-meta-block">
-          {credit && <span className="result-credit">Photo by {credit}</span>}
+          {credit && (
+            <span className="result-credit">
+              Photo by{" "}
+              {unsplashUrl ? (
+                <a href={unsplashUrl} target="_blank" rel="noopener noreferrer" className="result-credit-link">
+                  {credit}
+                </a>
+              ) : credit}
+            </span>
+          )}
           {solveRate !== undefined && (
             <span className={`solve-rate${solveRate < 30 ? " solve-rate--rare" : ""}`}>
               {solveRate < 30 ? `only ${solveRate}% solved` : `${solveRate}% solved`}

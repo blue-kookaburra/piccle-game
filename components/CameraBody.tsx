@@ -32,7 +32,7 @@ function HalfDial({ index, total, uid, majorEvery, shotKey, feedback }: HalfDial
   const R_MINOR_IN = 46;
   const R_MAJOR_IN = 40;
 
-  const rotDeg        = (index / total) * 360;
+  const rotDeg        = -(index / total) * 360;
   const indicatorColor = feedback ? FEEDBACK_COLOR[feedback] : "#ff4800";
   const clipId        = `dial-clip-${uid}`;
 

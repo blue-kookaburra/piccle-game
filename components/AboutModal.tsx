@@ -95,27 +95,27 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <h3 className="about-section-title">Scoring</h3>
                 <p className="about-text">
                   Round 1 always scores. From round 2 onward, you only earn points for
-                  settings you improve — getting yellow where you had red earns points;
+                  settings you improve on — getting yellow where you had red earns points;
                   repeating yellow earns nothing.
                 </p>
                 <div className="about-score-table">
                   <div className="about-score-row">
                     <span className="about-dot about-dot--green" />
-                    <span className="about-score-label">Green — exact match</span>
+                    <span className="about-score-label">Green — exact value</span>
                     <span className="about-score-pts">⅓ of round pool</span>
                   </div>
                   <div className="about-score-row">
                     <span className="about-dot about-dot--yellow" />
-                    <span className="about-score-label">Yellow — within 1 stop</span>
+                    <span className="about-score-label">Yellow — within 2 clicks</span>
                     <span className="about-score-pts">10% of pool</span>
                   </div>
                   <div className="about-score-row">
                     <span className="about-dot about-dot--red" />
-                    <span className="about-score-label">Red — more than 1 stop off</span>
+                    <span className="about-score-label">Red — 3 or more clicks off</span>
                     <span className="about-score-pts">0 pts</span>
                   </div>
                 </div>
-                <p className="about-subtext">Round pools: 1000 → 500 → 250 → 125 → 63</p>
+                <p className="about-subtext">Round pools: 1000 → 500 → 250 → 125 → 60</p>
               </section>
 
               {/* Details — expandable */}
@@ -123,11 +123,12 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <summary className="about-details-summary">Details</summary>
                 <div className="about-details-body">
                   <div className="about-detail-item">
-                    <span className="about-detail-label">Stops</span>
+                    <span className="about-detail-label">Clicks</span>
                     <p className="about-detail-text">
-                      Piccle measures proximity in stops — each stop is a doubling or halving.
-                      1/250 → 1/500 is one stop faster. f/2.8 → f/4 is one stop smaller.
-                      50mm → 100mm is one stop longer. Green = exact. Yellow = within 1 stop. Red = beyond.
+                      A "click" is one step on the dial — one value up or down. Yellow means
+                      you&apos;re within 2 clicks of the answer for that setting. For shutter speed,
+                      that&apos;s roughly two adjacent stops. For aperture, it&apos;s within two 1/3-stop
+                      increments. For focal length, it&apos;s the nearest two values in the list.
                     </p>
                   </div>
                   <div className="about-detail-item">

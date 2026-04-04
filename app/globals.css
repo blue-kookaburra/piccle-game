@@ -651,14 +651,14 @@ body {
 .result-streak-longest {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.04em;
 }
 
 .result-streak-reset {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.06em;
   padding: 14px 24px;
   border-bottom: 1px solid var(--zone-3);
@@ -676,7 +676,7 @@ body {
 .result-settings-label {
   font-family: var(--font-mono);
   font-size: 8px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -709,7 +709,7 @@ body {
 .rsi-label {
   font-family: var(--font-mono);
   font-size: 8px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -717,8 +717,7 @@ body {
 .rsi-original {
   font-family: var(--font-mono);
   font-size: 9px;
-  color: var(--zone-mid);
-  opacity: 0.7;
+  color: var(--zone-7);
 }
 
 /* Explanation */
@@ -751,14 +750,23 @@ body {
 .result-credit {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.04em;
 }
+
+.result-credit-link {
+  color: var(--zone-7);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--zone-mid);
+  transition: color 0.15s;
+}
+.result-credit-link:hover { color: var(--zone-9); }
 
 .solve-rate {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.04em;
   text-align: right;
 }

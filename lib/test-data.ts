@@ -27,6 +27,8 @@ export interface AnswerData {
   focalOriginal?: number;
   description: string;
   credit: string;
+  // Link to the original photo on Unsplash (revealed after game ends)
+  unsplashUrl?: string;
 }
 
 // One test challenge per date offset (index 0 = today, 1 = yesterday, etc.)
@@ -45,6 +47,7 @@ const TEST_CHALLENGES: Array<ChallengeData & AnswerData> = [
     focalOriginal: 120,
     description: "",
     credit: "Zheng XUE",
+    unsplashUrl: "https://unsplash.com/photos/red-suspension-bridge-over-a-river-with-city-skyline-_WEddfPLeeA",
   },
   {
     // Sunflower field — Lia Den, Nikon Z5, 50mm, f/2.8, 1/200→1/250, ISO 100
@@ -60,6 +63,7 @@ const TEST_CHALLENGES: Array<ChallengeData & AnswerData> = [
     focal: 50,
     description: "",
     credit: "Lia Den",
+    unsplashUrl: "https://unsplash.com/photos/a-woman-standing-in-a-field-of-sunflowers-TmJ70AXBOKg",
   },
   {
     // Mount Fuji — PJH, Sony A7 IV, 31mm→28mm, f/4, 1/2500→1/2000, ISO 100
@@ -76,6 +80,7 @@ const TEST_CHALLENGES: Array<ChallengeData & AnswerData> = [
     focalOriginal: 31,
     description: "",
     credit: "PJH",
+    unsplashUrl: "https://unsplash.com/photos/mount-fuji-seen-over-red-kochia-bushes-qSHMHyjL0Fc",
   },
   {
     // Hong Kong — Harrison Lin, Sony A7C II, 60mm, f/5.6, 1/200→1/250, ISO 640
@@ -91,6 +96,7 @@ const TEST_CHALLENGES: Array<ChallengeData & AnswerData> = [
     focal: 60,
     description: "Hong Kong",
     credit: "Harrison Lin",
+    unsplashUrl: "https://unsplash.com/photos/dKxvmVH7Bi0",
   },
 ];
 

@@ -34,6 +34,7 @@ interface AnswerData {
   description?: string;
   credit?: string;
   solveRate?: number;
+  unsplashUrl?: string;
 }
 
 const MAX_ATTEMPTS = 5;
@@ -179,6 +180,7 @@ export default function Home() {
           description: data.description ?? daily.description,
           credit: data.credit ?? daily.credit,
           solveRate: data.solveRate,
+          unsplashUrl: data.unsplashUrl,
         });
         const newStreak = updateStreak(daily.challengeDate);
         setStreak(newStreak);
@@ -270,6 +272,7 @@ export default function Home() {
               apertureOriginal={answer.apertureOriginal}
               focalOriginal={answer.focalOriginal}
               solveRate={answer.solveRate}
+              unsplashUrl={answer.unsplashUrl}
             />
           </section>
         ) : (

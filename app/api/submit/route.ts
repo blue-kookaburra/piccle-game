@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     shutterOriginal?: string;
     apertureOriginal?: string;
     focalOriginal?: number;
+    unsplashUrl?: string;
   } | null = null;
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
       shutterOriginal: test.shutterOriginal,
       apertureOriginal: test.apertureOriginal,
       focalOriginal: test.focalOriginal,
+      unsplashUrl: test.unsplashUrl,
     };
   }
 
