@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getTestChallenge } from "@/lib/test-data";
 
+// Must not be cached — the response changes every day at midnight.
+export const dynamic = "force-dynamic";
+
 // Returns today's image + challenge number — NO EXIF data.
 // EXIF is only returned by /api/submit on completion.
 export async function GET() {
