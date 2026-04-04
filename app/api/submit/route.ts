@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
         shutter_speed, aperture, focal_length,
         description, credit,
         camera, iso, photographer, location,
-        shutter_speed_original, focal_length_original
+        shutter_speed_original, focal_length_original,
+        unsplash_url
       )`)
       .eq("date", date)
       .single();
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
         credit: string;
         shutter_speed_original?: string;
         focal_length_original?: number;
+        unsplash_url?: string;
       };
       answer = { shutter: img.shutter_speed, aperture: img.aperture, focal: img.focal_length };
       revealData = {
@@ -57,6 +59,7 @@ export async function POST(req: NextRequest) {
         credit: img.credit,
         shutterOriginal: img.shutter_speed_original,
         focalOriginal: img.focal_length_original,
+        unsplashUrl: img.unsplash_url,
       };
     }
   }

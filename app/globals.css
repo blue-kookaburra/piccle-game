@@ -45,10 +45,10 @@
   --text-muted: var(--zone-7);
   --amber:      var(--amber-slide);
 
-  /* Fonts */
-  --font-display: var(--font-display, "Bodoni Moda", Georgia, serif);
-  --font-mono:    var(--font-mono, "JetBrains Mono", "Space Mono", monospace);
-  --font-body:    var(--font-body, "Outfit", system-ui, sans-serif);
+  /* Fonts — Next.js sets these via className on <html>; these are fallbacks only */
+  --font-display: "Bodoni Moda", Georgia, serif;
+  --font-mono:    "JetBrains Mono", "Space Mono", monospace;
+  --font-body:    "Outfit", system-ui, sans-serif;
 }
 
 /* ─── Reset ─────────────────────────────────────────────────────── */
