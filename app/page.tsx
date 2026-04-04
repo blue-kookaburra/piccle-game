@@ -9,7 +9,7 @@ import AttemptHistory from "@/components/AttemptHistory";
 import ResultCard from "@/components/ResultCard";
 import AboutModal from "@/components/AboutModal";
 import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
-import { getGameState, saveGameState, type Attempt } from "@/lib/game-state";
+import { getGameState, saveGameState, type Attempt, type RevealedAnswer } from "@/lib/game-state";
 import { getStreak, updateStreak, type StreakState } from "@/lib/streak";
 import type { AttemptFeedback, FeedbackColor } from "@/lib/scoring";
 
@@ -91,6 +91,7 @@ export default function Home() {
   });
   const [firing, setFiring] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
   const dialAnimatedRef = useRef(false);
 
   useEffect(() => {
@@ -107,6 +108,9 @@ export default function Home() {
       setAttempts(saved.attempts);
       setScore(saved.score);
       setCompleted(saved.completed);
+      if (saved.completed && saved.revealedAnswer) {
+        setAnswer(saved.revealedAnswer);
+      }
     }
     setStreak(getStreak());
   }, [daily]);
@@ -130,6 +134,8 @@ export default function Home() {
     if (!daily || firing || completed || attempts.length >= MAX_ATTEMPTS) return;
 
     setFiring(true);
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 160);
     navigator.vibrate?.(50);
 
     const attemptNumber = attempts.length + 1;
@@ -168,9 +174,9 @@ export default function Home() {
       setAttempts(newAttempts);
       setScore(newScore);
 
+      let revealedAnswer: RevealedAnswer | undefined;
       if (isOver) {
-        setCompleted(true);
-        setAnswer({
+        revealedAnswer = {
           shutter: data.answer?.shutter ?? SHUTTER_SPEEDS[shutterIdx],
           aperture: data.answer?.aperture ?? APERTURES[apertureIdx],
           focal: data.answer?.focal ?? FOCAL_LENGTHS[focalIdx],
@@ -181,7 +187,9 @@ export default function Home() {
           credit: data.credit ?? daily.credit,
           solveRate: data.solveRate,
           unsplashUrl: data.unsplashUrl,
-        });
+        };
+        setCompleted(true);
+        setAnswer(revealedAnswer);
         const newStreak = updateStreak(daily.challengeDate);
         setStreak(newStreak);
       }
@@ -191,6 +199,7 @@ export default function Home() {
         attempts: newAttempts,
         completed: isOver,
         score: newScore,
+        revealedAnswer,
       });
     } catch (err) {
       console.error("Submit failed", err);
@@ -300,6 +309,9 @@ export default function Home() {
       </div>
 
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
+
+      {/* SHOOT flash — projector lamp sensation */}
+      {showFlash && <div className="shoot-flash" aria-hidden="true" />}
     </main>
   );
 }

@@ -6,9 +6,16 @@ import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 import type { AttemptFeedback } from "@/lib/scoring";
 
 const FEEDBACK_COLOR: Record<"green" | "yellow" | "red", string> = {
-  green:  "#27ae60",
-  yellow: "#c8952a",
-  red:    "#c0392b",
+  green:  "#22ff88",
+  yellow: "#ffb800",
+  red:    "#ff4d5a",
+};
+
+// Per-parameter projected-light accent colors
+const DIAL_COLOR: Record<string, string> = {
+  shutter: "#00d4c8",   // cyan — time, motion, sky
+  aperture: "#ffb800",  // amber — light quantity, golden hour
+  focal: "#ff5c6a",     // coral — perspective, compression
 };
 
 // ─── Half-dial SVG ───────────────────────────────────────────────────────────
@@ -23,18 +30,23 @@ interface HalfDialProps {
   uid: string;
   majorEvery: number;
   shotKey: number;
+  dialColor: string;
   feedback?: "green" | "yellow" | "red";
 }
 
-function HalfDial({ index, total, uid, majorEvery, shotKey, feedback }: HalfDialProps) {
+function HalfDial({ index, total, uid, majorEvery, shotKey, dialColor, feedback }: HalfDialProps) {
   const R_BODY     = 56;
   const R_TICK_OUT = 51;
   const R_MINOR_IN = 46;
   const R_MAJOR_IN = 40;
 
-  const rotDeg        = -(index / total) * 360;
-  const indicatorColor = feedback ? FEEDBACK_COLOR[feedback] : "#ff4800";
-  const clipId        = `dial-clip-${uid}`;
+  const rotDeg         = -(index / total) * 360;
+  // Notch uses feedback color when known, otherwise dial's signature color
+  const indicatorColor = feedback ? FEEDBACK_COLOR[feedback] : dialColor;
+  const clipId         = `dial-clip-${uid}`;
+
+  // Glowing major ticks in the dial's signature color (very subtle)
+  const tickColor = dialColor + "40"; // 25% opacity hex
 
   const ticks = Array.from({ length: total }, (_, i) => {
     const angle   = ((i / total) * 2 * Math.PI) - Math.PI / 2;
@@ -60,9 +72,10 @@ function HalfDial({ index, total, uid, majorEvery, shotKey, feedback }: HalfDial
         <clipPath id={clipId}>
           <rect x="-62" y="-62" width="124" height="60" />
         </clipPath>
+        {/* Cool-biased radial gradient — glass, not leather */}
         <radialGradient id={`grad-${uid}`} cx="40%" cy="35%" r="65%">
-          <stop offset="0%"   stopColor="#2a2520" />
-          <stop offset="100%" stopColor="#0e0b09" />
+          <stop offset="0%"   stopColor="#1e2236" />
+          <stop offset="100%" stopColor="#07090f" />
         </radialGradient>
       </defs>
 
@@ -75,15 +88,15 @@ function HalfDial({ index, total, uid, majorEvery, shotKey, feedback }: HalfDial
           <line
             key={i}
             x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-            stroke={t.isMajor ? "#524844" : "#2e2926"}
+            stroke={t.isMajor ? tickColor : "#1a1f32"}
             strokeWidth={t.isMajor ? 1.5 : 0.8}
             strokeLinecap="round"
           />
         ))}
       </g>
 
-      {/* Rim */}
-      <circle cx="0" cy="0" r={R_BODY} fill="none" stroke="#2a2520" strokeWidth="2" clipPath={`url(#${clipId})`} />
+      {/* Rim — subtle cool border */}
+      <circle cx="0" cy="0" r={R_BODY} fill="none" stroke="#21263a" strokeWidth="2" clipPath={`url(#${clipId})`} />
 
       {/* Glow ring — pulses on each shot, keyed so it re-animates even for repeated colors */}
       {feedback && (
@@ -93,13 +106,13 @@ function HalfDial({ index, total, uid, majorEvery, shotKey, feedback }: HalfDial
           fill="none"
           stroke={FEEDBACK_COLOR[feedback]}
           clipPath={`url(#${clipId})`}
-          initial={{ strokeWidth: 6, opacity: 0.85 }}
+          initial={{ strokeWidth: 8, opacity: 0.9 }}
           animate={{ strokeWidth: 0, opacity: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         />
       )}
 
-      {/* Indicator notch */}
+      {/* Indicator notch — dial color or feedback color */}
       <line
         x1="0" y1={-(R_BODY + 1)} x2="0" y2={-(R_MAJOR_IN - 2)}
         stroke={indicatorColor}
@@ -107,8 +120,17 @@ function HalfDial({ index, total, uid, majorEvery, shotKey, feedback }: HalfDial
         strokeLinecap="round"
       />
 
+      {/* Notch glow */}
+      <line
+        x1="0" y1={-(R_BODY + 1)} x2="0" y2={-(R_MAJOR_IN - 2)}
+        stroke={indicatorColor}
+        strokeWidth="6"
+        strokeLinecap="round"
+        opacity="0.2"
+      />
+
       {/* Center boss */}
-      <circle cx="0" cy="0" r="3.5" fill="#1a1612" stroke="#2a2520" strokeWidth="1" />
+      <circle cx="0" cy="0" r="3.5" fill="#0e1018" stroke="#21263a" strokeWidth="1" />
     </svg>
   );
 }
@@ -123,6 +145,7 @@ interface DialPickerProps {
   uid: string;
   majorEvery: number;
   shotKey: number;
+  dialColor: string;
   onDecrement: () => void;
   onIncrement: () => void;
   disabled?: boolean;
@@ -130,7 +153,7 @@ interface DialPickerProps {
 }
 
 function DialPicker({
-  label, value, index, total, uid, majorEvery, shotKey,
+  label, value, index, total, uid, majorEvery, shotKey, dialColor,
   onDecrement, onIncrement, disabled, feedback,
 }: DialPickerProps) {
   const dragRef = useRef<{ lastX: number; accumulated: number } | null>(null);
@@ -163,22 +186,38 @@ function DialPicker({
     dragRef.current = null;
   }
 
+  // Active value color: feedback color if known, otherwise dial's signature color
+  const valueColor = feedback ? FEEDBACK_COLOR[feedback] : dialColor;
+
   return (
     <div className="dial-picker">
-      <span className="dial-label">{label}</span>
+      <span className="dial-label" style={{ color: dialColor + "cc" }}>{label}</span>
 
       <div className="dial-value-row">
-        <button className="dial-arrow" onClick={() => step(-1)} disabled={disabled || index === 0} aria-label={`Decrease ${label}`}>‹</button>
+        <button
+          className="dial-arrow"
+          onClick={() => step(-1)}
+          disabled={disabled || index === 0}
+          aria-label={`Decrease ${label}`}
+          style={{ "--dial-active-color": dialColor } as React.CSSProperties}
+        >‹</button>
         <motion.span
           className="dial-value"
           key={value}
           initial={{ opacity: 0.5, y: -4 }}
           animate={{ opacity: 1,   y:  0 }}
           transition={{ duration: 0.1 }}
+          style={{ color: valueColor }}
         >
           {value}
         </motion.span>
-        <button className="dial-arrow" onClick={() => step(1)} disabled={disabled || index === total - 1} aria-label={`Increase ${label}`}>›</button>
+        <button
+          className="dial-arrow"
+          onClick={() => step(1)}
+          disabled={disabled || index === total - 1}
+          aria-label={`Increase ${label}`}
+          style={{ "--dial-active-color": dialColor } as React.CSSProperties}
+        >›</button>
       </div>
 
       {/* Drag zone: touch-action pan-y lets vertical page-scroll pass through */}
@@ -196,6 +235,7 @@ function DialPicker({
           uid={uid}
           majorEvery={majorEvery}
           shotKey={shotKey}
+          dialColor={dialColor}
           feedback={feedback}
         />
       </div>
@@ -229,7 +269,7 @@ export default function CameraBody({
     <div className="camera-controls">
       <div className="dials-panel">
         <div className="dials-row">
-          {/* Shutter speed — 1-stop increments, alternate major/minor */}
+          {/* Shutter speed — cyan — 1-stop increments, alternate major/minor */}
           <DialPicker
             label="SHUTTER SPEED"
             value={SHUTTER_SPEEDS[shutterIdx]}
@@ -238,13 +278,14 @@ export default function CameraBody({
             uid="shutter"
             majorEvery={2}
             shotKey={shotKey}
+            dialColor={DIAL_COLOR.shutter}
             onDecrement={() => onShutterChange(shutterIdx - 1)}
             onIncrement={() => onShutterChange(shutterIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.shutter}
           />
           <div className="dial-divider" />
-          {/* Aperture — 1/3-stop increments, major every 3rd = full stop */}
+          {/* Aperture — amber — 1/3-stop increments, major every 3rd = full stop */}
           <DialPicker
             label="APERTURE"
             value={APERTURES[apertureIdx]}
@@ -253,13 +294,14 @@ export default function CameraBody({
             uid="aperture"
             majorEvery={3}
             shotKey={shotKey}
+            dialColor={DIAL_COLOR.aperture}
             onDecrement={() => onApertureChange(apertureIdx - 1)}
             onIncrement={() => onApertureChange(apertureIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.aperture}
           />
           <div className="dial-divider" />
-          {/* Focal length — not even stops, alternate major/minor */}
+          {/* Focal length — coral — not even stops, alternate major/minor */}
           <DialPicker
             label="FOCAL LENGTH"
             value={`${FOCAL_LENGTHS[focalIdx]}mm`}
@@ -268,6 +310,7 @@ export default function CameraBody({
             uid="focal"
             majorEvery={2}
             shotKey={shotKey}
+            dialColor={DIAL_COLOR.focal}
             onDecrement={() => onFocalChange(focalIdx - 1)}
             onIncrement={() => onFocalChange(focalIdx + 1)}
             disabled={disabled}

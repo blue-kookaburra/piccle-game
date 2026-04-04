@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bodoni_Moda, Azeret_Mono, DM_Sans } from "next/font/google";
+import { Bodoni_Moda, JetBrains_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -9,13 +9,13 @@ const bodoniModa = Bodoni_Moda({
   subsets: ["latin"],
 });
 
-const azeretMono = Azeret_Mono({
+const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "700"],
   variable: "--font-mono",
   subsets: ["latin"],
 });
 
-const dmSans = DM_Sans({
+const outfit = Outfit({
   weight: ["400", "500"],
   variable: "--font-body",
   subsets: ["latin"],
@@ -34,7 +34,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0c0a09",
+  themeColor: "#07090f",
 };
 
 export default function RootLayout({
@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bodoniModa.variable} ${azeretMono.variable} ${dmSans.variable}`}
+      className={`${bodoniModa.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
     >
       <body>{children}</body>
     </html>

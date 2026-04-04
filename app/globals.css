@@ -2,44 +2,53 @@
 
 /* ═══════════════════════════════════════════════════════════════════
    PICCLE — Design System
-   Zone Scale (Ansel Adams) × Hot Pixel
+   REVERSAL: Slide film projected in a dark studio
+   Zone Scale (cool ink) × Projected Light
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Zone Scale */
-  --zone-0:   #0c0a09;
-  --zone-1:   #161210;
-  --zone-2:   #1f1b18;
-  --zone-3:   #2a2520;
-  --zone-mid: #4a4040;
-  --zone-7:   #8c7e74;
-  --zone-9:   #f2ede7;
+  /* Zone Scale — cool ink bias, not warm brown */
+  --zone-0:   #07090f;   /* near-black with blue cast — the dark studio */
+  --zone-1:   #0e1018;   /* deep cool navy — card/panel surfaces */
+  --zone-2:   #161929;   /* lifted surface */
+  --zone-3:   #21263a;   /* borders, hover states */
+  --zone-mid: #3a4260;   /* disabled/muted */
+  --zone-7:   #8892b4;   /* secondary text — cool mid */
+  --zone-9:   #e8eeff;   /* primary text — cool near-white, projected light */
 
-  /* Signature accent — ONE vivid element in the whole system */
-  --hot-pixel: #ff4800;
+  /* Primary CTA — projector lamp (warm vs cold bg = max contrast) */
+  --hot-pixel: #ffe566;  /* lamp gold — logo, SHOOT button, score display */
 
-  /* Secondary accents */
-  --film-gold: #c8952a;
+  /* Per-parameter projected light accents */
+  --cyan-slide:  #00d4c8;  /* SHUTTER — time, motion, sky */
+  --amber-slide: #ffb800;  /* APERTURE — light quantity, golden hour */
+  --coral-slide: #ff5c6a;  /* FOCAL — perspective drama, compression */
+
+  /* Lamp alias */
+  --lamp: #ffe566;
+
+  /* Legacy aliases (retained for compatibility) */
+  --film-gold: #ffb800;
   --blueprint: #2d7dd2;
 
   /* Feedback */
-  --correct: #27ae60;
-  --close:   #c8952a;
-  --wrong:   #c0392b;
+  --correct: #22ff88;   /* electric green — exposure nailed */
+  --close:   #ffb800;   /* warm amber — one stop off */
+  --wrong:   #ff4d5a;   /* vivid red — blown out */
 
-  /* Legacy aliases */
+  /* Layout aliases */
   --bg:         var(--zone-0);
   --bg-card:    var(--zone-1);
   --bg-lift:    var(--zone-2);
   --border:     var(--zone-3);
   --text:       var(--zone-9);
   --text-muted: var(--zone-7);
-  --amber:      var(--film-gold);
+  --amber:      var(--amber-slide);
 
   /* Fonts */
   --font-display: var(--font-display, "Bodoni Moda", Georgia, serif);
-  --font-mono:    var(--font-mono, "Azeret Mono", "Space Mono", monospace);
-  --font-body:    var(--font-body, "DM Sans", system-ui, sans-serif);
+  --font-mono:    var(--font-mono, "JetBrains Mono", "Space Mono", monospace);
+  --font-body:    var(--font-body, "Outfit", system-ui, sans-serif);
 }
 
 /* ─── Reset ─────────────────────────────────────────────────────── */
@@ -57,8 +66,8 @@ body {
   height: 100%;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  /* Film grain — analog texture over the whole app */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  /* Digital sensor noise — denser, cooler than film grain */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 /* ─── Game layout ───────────────────────────────────────────────── */
@@ -106,10 +115,10 @@ body {
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
-  color: var(--film-gold);
+  color: var(--amber-slide);
   letter-spacing: 0.06em;
-  background: rgba(200, 149, 42, 0.1);
-  border: 1px solid rgba(200, 149, 42, 0.2);
+  background: rgba(255, 184, 0, 0.08);
+  border: 1px solid rgba(255, 184, 0, 0.2);
   padding: 3px 10px 3px 8px;
   border-radius: 20px;
 }
@@ -362,17 +371,18 @@ body {
   flex-shrink: 0;
 }
 
-/* Dot: filled square for correct/close, open circle for wrong */
+/* Dot: circle, filled with feedback color, outline in param channel color */
 .attempt-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
   flex-shrink: 0;
+  border: 1.5px solid transparent;
 }
 
+/* Empty future attempt dots — outline only in channel color */
 .attempt-dot--empty {
   border-radius: 50%;
-  border: 1.5px solid var(--zone-3);
   background: transparent;
 }
 
@@ -380,11 +390,15 @@ body {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
-  color: var(--film-gold);
+  color: var(--lamp);
   min-width: 36px;
   text-align: right;
   flex-shrink: 0;
   letter-spacing: 0.02em;
+}
+
+.attempt-pts--zero {
+  color: var(--zone-mid);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -416,13 +430,15 @@ body {
   gap: 18px;
 }
 
-/* The instrument panel surface */
+/* The instrument panel surface — glass, not leather */
 .dials-panel {
   width: 100%;
   background: var(--zone-1);
   border: 1px solid var(--zone-3);
+  border-top: 1px solid rgba(232, 238, 255, 0.08);
   border-radius: 18px;
   overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(232, 238, 255, 0.06), 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
 .dials-row {
@@ -494,7 +510,7 @@ body {
 }
 
 .dial-arrow:hover:not(:disabled) { color: var(--zone-9); }
-.dial-arrow:active:not(:disabled) { color: var(--hot-pixel); }
+.dial-arrow:active:not(:disabled) { color: var(--dial-active-color, var(--lamp)); }
 .dial-arrow:disabled { opacity: 0.12; cursor: default; }
 
 .dial-value {
@@ -509,12 +525,12 @@ body {
   flex: 1;
 }
 
-/* ─── Shutter button ────────────────────────────────────────────── */
+/* ─── Shutter button — the projector lamp ───────────────────────── */
 .shutter-btn {
   width: 100%;
   height: 56px;
-  background: var(--hot-pixel);
-  color: #fff;
+  background: var(--lamp);
+  color: #07090f;
   border: none;
   border-radius: 14px;
   font-family: var(--font-mono);
@@ -524,11 +540,25 @@ body {
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
-  animation: shoot-pulse 2.8s ease-in-out infinite;
+  animation: lamp-pulse 2.4s ease-in-out infinite;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Radiating ring overlay — the flash sensation */
+.shutter-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: transparent;
+  border: 2px solid rgba(255, 229, 102, 0.8);
+  animation: lamp-ring 2.4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .shutter-btn-label {
@@ -540,25 +570,37 @@ body {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  opacity: 0.65;
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  opacity: 0.55;
+  border-left: 1px solid rgba(7, 9, 15, 0.25);
   padding: 0 16px 0 16px;
   line-height: 1;
 }
 
-@keyframes shoot-pulse {
-  0%, 100% { box-shadow: 0 4px 28px rgba(255,72,0,0.32); }
-  50%       { box-shadow: 0 4px 44px rgba(255,72,0,0.54); }
+@keyframes lamp-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 229, 102, 0.5),
+                0 4px 32px rgba(255, 229, 102, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 229, 102, 0),
+                0 4px 48px rgba(255, 229, 102, 0.45);
+  }
 }
 
-.shutter-btn:hover:not(:disabled)  { opacity: 0.9; }
-.shutter-btn:active:not(:disabled) { transform: scale(0.985); }
+@keyframes lamp-ring {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 0;   transform: scale(1.04); }
+}
+
+.shutter-btn:hover:not(:disabled)  { opacity: 0.92; }
+.shutter-btn:active:not(:disabled) { transform: scale(0.982); }
 .shutter-btn:disabled {
-  opacity: 0.28;
+  opacity: 0.25;
   cursor: default;
   animation: none;
   box-shadow: none;
 }
+.shutter-btn:disabled::after { animation: none; opacity: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════
    RESULT CARD — The developed moment
@@ -594,9 +636,10 @@ body {
   font-family: var(--font-display);
   font-weight: 900;
   font-size: clamp(72px, 22vw, 96px);
-  color: var(--hot-pixel);
+  color: var(--lamp);
   line-height: 0.9;
   letter-spacing: 0.02em;
+  text-shadow: 0 0 40px rgba(255, 229, 102, 0.3);
 }
 
 .result-score-label {
@@ -617,16 +660,16 @@ body {
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  background: rgba(200, 149, 42, 0.1);
-  color: var(--film-gold);
-  border: 1px solid rgba(200, 149, 42, 0.25);
+  background: rgba(255, 184, 0, 0.1);
+  color: var(--amber-slide);
+  border: 1px solid rgba(255, 184, 0, 0.25);
   margin-top: 4px;
 }
 
 .skill-tier-badge--master {
-  background: rgba(255, 72, 0, 0.1);
-  color: var(--hot-pixel);
-  border-color: rgba(255, 72, 0, 0.25);
+  background: rgba(255, 229, 102, 0.1);
+  color: var(--lamp);
+  border-color: rgba(255, 229, 102, 0.3);
 }
 
 /* Streak row */
@@ -644,7 +687,7 @@ body {
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
-  color: var(--film-gold);
+  color: var(--amber-slide);
   letter-spacing: 0.04em;
 }
 
@@ -787,8 +830,8 @@ body {
   flex: 1;
   height: 50px;
   background: transparent;
-  border: 1px solid var(--hot-pixel);
-  color: var(--hot-pixel);
+  border: 1px solid var(--lamp);
+  color: var(--lamp);
   border-radius: 12px;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -799,7 +842,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-.share-btn:hover { background: rgba(255,72,0,0.08); }
+.share-btn:hover { background: rgba(255,229,102,0.08); }
 
 .share-btn--secondary {
   border-color: var(--zone-3);
@@ -826,10 +869,11 @@ body {
   font-family: var(--font-display);
   font-weight: 900;
   font-size: 32px;
-  color: var(--hot-pixel);
+  color: var(--lamp);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   animation: developing 1.8s ease-in-out infinite;
+  text-shadow: 0 0 32px rgba(255, 229, 102, 0.4);
 }
 
 @keyframes developing {
@@ -938,7 +982,7 @@ body {
   line-height: 1;
 }
 
-.stats-tile-value--hot { color: var(--hot-pixel); }
+.stats-tile-value--hot { color: var(--lamp); }
 
 .stats-tile-label {
   font-family: var(--font-mono);
@@ -1097,7 +1141,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--hot-pixel);
+  color: var(--lamp);
   margin-bottom: 6px;
 }
 
@@ -1294,8 +1338,25 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* ─── SHOOT flash — full-viewport lamp wash ─────────────────────── */
+.shoot-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(255, 229, 102, 0.035);
+  pointer-events: none;
+  animation: flash-fade 160ms ease-out forwards;
+}
+
+@keyframes flash-fade {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dial-picker svg g      { transition: none !important; }
-  .shutter-btn            { animation: none !important; box-shadow: 0 4px 28px rgba(255,72,0,0.32); }
+  .shutter-btn            { animation: none !important; box-shadow: 0 0 24px rgba(255,229,102,0.3); }
+  .shutter-btn::after     { animation: none !important; opacity: 0; }
   .loading-wordmark       { animation: none !important; }
+  .shoot-flash            { display: none !important; }
 }

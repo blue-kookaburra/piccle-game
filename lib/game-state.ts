@@ -7,11 +7,25 @@ export interface Attempt {
   feedback: AttemptFeedback;
 }
 
+export interface RevealedAnswer {
+  shutter: string;
+  aperture: string;
+  focal: number;
+  shutterOriginal?: string;
+  apertureOriginal?: string;
+  focalOriginal?: number;
+  description?: string;
+  credit?: string;
+  solveRate?: number;
+  unsplashUrl?: string;
+}
+
 export interface DailyGameState {
   date: string;
   attempts: Attempt[];
   completed: boolean;
   score: number;
+  revealedAnswer?: RevealedAnswer;
 }
 
 const KEY = "shutter-shaper-game";
