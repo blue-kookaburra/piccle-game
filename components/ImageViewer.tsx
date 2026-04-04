@@ -12,6 +12,17 @@ interface ImageViewerProps {
   photographer?: string;
 }
 
+// Strip duplicate Make prefix: "Nikon Corporation Nikon D750" → "Nikon D750"
+function cleanCamera(raw: string): string {
+  const words = raw.trim().split(/\s+/);
+  for (let i = 1; i < words.length; i++) {
+    if (words[i].toLowerCase() === words[0].toLowerCase()) {
+      return words.slice(i).join(' ');
+    }
+  }
+  return raw;
+}
+
 export default function ImageViewer({
   imageUrl,
   challengeNumber,
@@ -23,7 +34,8 @@ export default function ImageViewer({
   const [expanded, setExpanded] = useState(false);
 
   // Camera spec line: "Sony A7C II · ISO 400"
-  const specLine = [camera, iso ? `ISO ${iso}` : null].filter(Boolean).join("  ·  ");
+  const specLine = [camera ? cleanCamera(camera) : null, iso ? `ISO ${iso}` : null]
+    .filter(Boolean).join("  ·  ");
 
   return (
     <>

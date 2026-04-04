@@ -93,6 +93,7 @@ export default function Home() {
   const [showAbout, setShowAbout] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const dialAnimatedRef = useRef(false);
+  const historyRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     fetch("/api/daily")
@@ -173,6 +174,10 @@ export default function Home() {
 
       setAttempts(newAttempts);
       setScore(newScore);
+      // Scroll history into view so the new attempt row is always visible
+      setTimeout(() => {
+        historyRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 60);
 
       let revealedAnswer: RevealedAnswer | undefined;
       if (isOver) {
@@ -285,27 +290,30 @@ export default function Home() {
             />
           </section>
         ) : (
-          <section className="camera-section">
-            <CameraBody
-              shutterIdx={shutterIdx}
-              apertureIdx={apertureIdx}
-              focalIdx={focalIdx}
-              onShutterChange={setShutterIdx}
-              onApertureChange={setApertureIdx}
-              onFocalChange={setFocalIdx}
-              onFire={handleFire}
-              disabled={completed || attempts.length >= MAX_ATTEMPTS}
-              firing={firing}
-              attemptsLeft={shotsLeft}
-              shotKey={attempts.length}
-              lastAttemptFeedback={attempts[attempts.length - 1]?.feedback}
-            />
-          </section>
-        )}
+          <>
+            {/* Attempt history — top of card so it's always visible (Wordle pattern) */}
+            <section className="history-section" ref={historyRef}>
+              <AttemptHistory attempts={attempts} maxAttempts={MAX_ATTEMPTS} />
+            </section>
 
-        <section className="history-section">
-          <AttemptHistory attempts={attempts} maxAttempts={MAX_ATTEMPTS} />
-        </section>
+            <section className="camera-section">
+              <CameraBody
+                shutterIdx={shutterIdx}
+                apertureIdx={apertureIdx}
+                focalIdx={focalIdx}
+                onShutterChange={setShutterIdx}
+                onApertureChange={setApertureIdx}
+                onFocalChange={setFocalIdx}
+                onFire={handleFire}
+                disabled={completed || attempts.length >= MAX_ATTEMPTS}
+                firing={firing}
+                attemptsLeft={shotsLeft}
+                shotKey={attempts.length}
+                lastAttemptFeedback={attempts[attempts.length - 1]?.feedback}
+              />
+            </section>
+          </>
+        )}
       </div>
 
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />

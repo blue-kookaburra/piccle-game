@@ -19,10 +19,10 @@
   /* Primary CTA — projector lamp (warm vs cold bg = max contrast) */
   --hot-pixel: #ffe566;  /* lamp gold — logo, SHOOT button, score display */
 
-  /* Per-parameter projected light accents */
-  --cyan-slide:  #00d4c8;  /* SHUTTER — time, motion, sky */
-  --amber-slide: #ffb800;  /* APERTURE — light quantity, golden hour */
-  --coral-slide: #ff5c6a;  /* FOCAL — perspective drama, compression */
+  /* Per-parameter identity accents — distinct from G/Y/R feedback */
+  --cyan-slide:  #60a5fa;  /* SHUTTER — cornflower blue, sky, time */
+  --amber-slide: #ffb800;  /* APERTURE — amber (feedback close reuses this) */
+  --coral-slide: #f9a8d4;  /* FOCAL — blush pink, warmth, perspective */
 
   /* Lamp alias */
   --lamp: #ffe566;
@@ -312,7 +312,6 @@ body {
 
 .history-section {
   padding: 16px 20px 14px;
-  border-bottom: 1px solid var(--zone-3);
 }
 
 .attempt-history {
@@ -371,21 +370,6 @@ body {
   flex-shrink: 0;
 }
 
-/* Dot: circle, filled with feedback color, outline in param channel color */
-.attempt-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  border: 1.5px solid transparent;
-}
-
-/* Empty future attempt dots — outline only in channel color */
-.attempt-dot--empty {
-  border-radius: 50%;
-  background: transparent;
-}
-
 .attempt-pts {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -412,6 +396,7 @@ body {
   align-items: center;
   padding: 20px 20px 28px;
   gap: 18px;
+  border-top: 1px solid var(--zone-3);
 }
 
 .attempts-remaining {
@@ -566,14 +551,61 @@ body {
   text-align: center;
 }
 
-.shutter-btn-count {
-  font-size: 11px;
+/* ─── Shot counter — mechanical film-counter window ────────────── */
+.shot-counter-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid rgba(7, 9, 15, 0.3);
+  padding: 0 14px;
+  align-self: stretch;
+}
+
+.shot-counter-window {
+  position: relative;
+  width: 26px;
+  height: 36px;
+  overflow: hidden;
+  background: #06070c;
+  border-radius: 4px;
+  border: 1.5px solid rgba(255, 229, 102, 0.3);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 1px 0 rgba(255, 255, 255, 0.08);
+  /* Fade top + bottom to give depth illusion of adjacent numbers */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 28%,
+    black 72%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 28%,
+    black 72%,
+    transparent 100%
+  );
+}
+
+.shot-counter-strip {
+  transition: transform 0.42s cubic-bezier(0.34, 1.2, 0.64, 1);
+  will-change: transform;
+}
+
+.shot-counter-digit {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  opacity: 0.55;
-  border-left: 1px solid rgba(7, 9, 15, 0.25);
-  padding: 0 16px 0 16px;
+  color: var(--lamp);
   line-height: 1;
+  letter-spacing: 0;
 }
 
 @keyframes lamp-pulse {
