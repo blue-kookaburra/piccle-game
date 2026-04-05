@@ -21,12 +21,14 @@ interface ResultCardProps {
   credit?: string;
   solveRate?: number;
   unsplashUrl?: string;
+  comment?: string;
+  completionLink?: string;
 }
 
 export default function ResultCard({
   score, attempts, answer, streak, challengeNumber,
   shutterOriginal, apertureOriginal, focalOriginal,
-  description, credit, solveRate, unsplashUrl,
+  description, credit, solveRate, unsplashUrl, comment, completionLink,
 }: ResultCardProps) {
   const [displayScore, setDisplayScore] = useState(0);
   const [flashed, setFlashed]           = useState(false);
@@ -57,7 +59,7 @@ export default function ResultCard({
   }, [score]);
 
   const tier = getSkillTier(score);
-  const explanation = explainSettings(answer.shutter, answer.aperture, answer.focal, description);
+  const explanation = comment || explainSettings(answer.shutter, answer.aperture, answer.focal, description);
 
   function buildShareText(): string {
     const DOT = { green: "🟢", yellow: "🟡", red: "🔴" } as const;
@@ -95,6 +97,9 @@ export default function ResultCard({
     }
   }
 
+  const won = attempts[attempts.length - 1]?.feedback.isCorrect ?? false;
+  const shotCount = attempts.length;
+
   return (
     <motion.div
       className="result-card"
@@ -102,6 +107,11 @@ export default function ResultCard({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
+      {/* ── Completion message ── */}
+      <div className={`result-outcome${won ? " result-outcome--won" : " result-outcome--lost"}`}>
+        {won ? `Correct in ${shotCount} shot${shotCount === 1 ? "" : "s"}!` : "Better luck next time"}
+      </div>
+
       {/* ── Score ── */}
       <div className="result-score-block">
         <motion.div
@@ -175,8 +185,8 @@ export default function ResultCard({
         </motion.div>
       )}
 
-      {/* ── Credit + solve rate ── */}
-      {(credit || solveRate !== undefined) && (
+      {/* ── Credit + solve rate + view link ── */}
+      {(credit || solveRate !== undefined || completionLink) && (
         <div className="result-meta-block">
           {credit && (
             <span className="result-credit">
@@ -187,6 +197,11 @@ export default function ResultCard({
                 </a>
               ) : credit}
             </span>
+          )}
+          {completionLink && (
+            <a href={completionLink} target="_blank" rel="noopener noreferrer" className="result-view-link">
+              View photo ↗
+            </a>
           )}
           {solveRate !== undefined && (
             <span className={`solve-rate${solveRate < 30 ? " solve-rate--rare" : ""}`}>

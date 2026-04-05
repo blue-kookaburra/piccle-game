@@ -35,6 +35,8 @@ interface AnswerData {
   credit?: string;
   solveRate?: number;
   unsplashUrl?: string;
+  comment?: string;
+  completionLink?: string;
 }
 
 const MAX_ATTEMPTS = 5;
@@ -96,7 +98,8 @@ export default function Home() {
   const historyRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    fetch("/api/daily")
+    const localDate = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
+    fetch(`/api/daily?date=${localDate}`)
       .then((r) => { if (!r.ok) throw new Error("no challenge"); return r.json(); })
       .then((data: DailyData) => setDaily(data))
       .catch(() => setLoadError(true));
@@ -192,6 +195,8 @@ export default function Home() {
           credit: data.credit ?? daily.credit,
           solveRate: data.solveRate,
           unsplashUrl: data.unsplashUrl,
+          comment: data.comment,
+          completionLink: data.completionLink,
         };
         setCompleted(true);
         setAnswer(revealedAnswer);
@@ -287,6 +292,8 @@ export default function Home() {
               focalOriginal={answer.focalOriginal}
               solveRate={answer.solveRate}
               unsplashUrl={answer.unsplashUrl}
+              comment={answer.comment}
+              completionLink={answer.completionLink}
             />
           </section>
         ) : (

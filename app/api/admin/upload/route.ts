@@ -56,10 +56,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: insertError?.message ?? "Insert failed" }, { status: 500 });
   }
 
-  // Schedule daily challenge
+  // Bump any challenges already scheduled for this date or later, then insert
+  if (assign_date) {
+    await supabase.rpc("bump_challenges_from", { p_date: assign_date });
+  }
+
   const { error: scheduleError } = await supabase
     .from("daily_challenges")
-    .upsert({ date: assign_date, image_id: imageRow.id });
+    .insert({ date: assign_date, image_id: imageRow.id });
 
   if (scheduleError) {
     return NextResponse.json({ error: scheduleError.message }, { status: 500 });

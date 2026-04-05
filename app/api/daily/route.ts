@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getTestChallenge } from "@/lib/test-data";
 
 // Must not be cached — the response changes every day at midnight.
@@ -6,8 +6,10 @@ export const dynamic = "force-dynamic";
 
 // Returns today's image + challenge number — NO EXIF data.
 // EXIF is only returned by /api/submit on completion.
-export async function GET() {
-  const today = new Date().toISOString().split("T")[0];
+export async function GET(req: NextRequest) {
+  // Use the client's local date (sent as ?date=YYYY-MM-DD) so the challenge
+  // resets at midnight in the player's timezone, not midnight UTC.
+  const today = req.nextUrl.searchParams.get("date") ?? new Date().toISOString().split("T")[0];
 
   // If no Supabase is configured, use test data
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {

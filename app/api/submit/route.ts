@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
     apertureOriginal?: string;
     focalOriginal?: number;
     unsplashUrl?: string;
+    comment?: string;
+    completionLink?: string;
   } | null = null;
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
         description, credit,
         camera, iso, photographer, location,
         shutter_speed_original, focal_length_original,
-        unsplash_url
+        unsplash_url, comment, completion_link
       )`)
       .eq("date", date)
       .single();
@@ -52,6 +54,8 @@ export async function POST(req: NextRequest) {
         shutter_speed_original?: string;
         focal_length_original?: number;
         unsplash_url?: string;
+        comment?: string;
+        completion_link?: string;
       };
       answer = { shutter: img.shutter_speed, aperture: img.aperture, focal: img.focal_length };
       revealData = {
@@ -60,6 +64,8 @@ export async function POST(req: NextRequest) {
         shutterOriginal: img.shutter_speed_original,
         focalOriginal: img.focal_length_original,
         unsplashUrl: img.unsplash_url,
+        comment: img.comment,
+        completionLink: img.completion_link,
       };
     }
   }

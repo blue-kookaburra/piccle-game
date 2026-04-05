@@ -105,11 +105,6 @@ export default function StatsPage() {
             </div>
           </div>
 
-          {/* Insight */}
-          {stats.insight && (
-            <p className="stats-insight">&ldquo;{stats.insight}&rdquo;</p>
-          )}
-
           {/* Last 7 avg */}
           {stats.gamesPlayed >= 7 && (
             <div className="stats-tile">

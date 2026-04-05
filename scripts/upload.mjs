@@ -130,7 +130,7 @@ for (let i = 0; i < rows.length; i++) {
   // Build the image record
   const imageRecord = {
     storage_url:            usableLink,
-    shutter_speed:          row.shutter_speed || null,
+    shutter_speed:          row.ss || row.shutter_speed || null,  // snapped game value
     aperture:               row.aperture ? `f/${row.aperture}` : null,
     focal_length:           row.fl ? parseInt(row.fl) : null,
     description:            row.location || null,
@@ -142,6 +142,8 @@ for (let i = 0; i < rows.length; i++) {
     location:               row.location || null,
     shutter_speed_original: row.shutter_speed || null,   // raw EXIF (unsnapped)
     focal_length_original:  row.focal_length ? parseInt(row.focal_length) : null,
+    comment:                row.comment || null,
+    completion_link:        row.completion_link || null,
   };
 
   // Insert into images table

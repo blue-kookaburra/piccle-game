@@ -18,6 +18,8 @@ export interface RevealedAnswer {
   credit?: string;
   solveRate?: number;
   unsplashUrl?: string;
+  comment?: string;
+  completionLink?: string;
 }
 
 export interface DailyGameState {

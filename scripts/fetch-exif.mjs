@@ -14,6 +14,19 @@ import { readFileSync, writeFileSync } from "fs";
 const API_KEY = process.argv[2];
 const INPUT_FILE = process.argv[3] || "scripts/links.csv";
 
+// ─── Load .env.local for ANTHROPIC_API_KEY ────────────────────────────────────
+let ANTHROPIC_API_KEY = null;
+try {
+  const envLines = readFileSync(".env.local", "utf8").split("\n");
+  for (const line of envLines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("ANTHROPIC_API_KEY=")) {
+      ANTHROPIC_API_KEY = trimmed.slice("ANTHROPIC_API_KEY=".length).trim();
+      break;
+    }
+  }
+} catch { /* .env.local missing — comments will be skipped */ }
+
 if (!API_KEY) {
   console.error("Usage: node scripts/fetch-exif.mjs YOUR_ACCESS_KEY [input.csv]");
   process.exit(1);
@@ -63,6 +76,12 @@ function formatCamera(make, model) {
 const VALID_FOCAL_LENGTHS = [
   10, 12, 14, 16, 18, 20, 24, 28, 35, 40,
   50, 60, 70, 85, 105, 135, 175, 230, 300, 400,
+];
+
+// Canonical shutter speeds — keep in sync with lib/camera-values.ts
+const SHUTTER_SPEEDS = [
+  "1/8000","1/4000","1/2000","1/1000","1/500","1/250","1/125",
+  "1/60","1/30","1/15","1/8","1/4","1/2","1s","2s","4s","8s","15s","30s","60s",
 ];
 
 // Valid apertures in the game — used to snap EXIF values to nearest option
@@ -132,6 +151,25 @@ function formatShutter(exposureTime) {
   return `1/${denom}`;
 }
 
+// Converts a canonical shutter string ("1/250", "2s") to seconds
+function shutterStrToSecs(str) {
+  if (str.endsWith("s")) return parseFloat(str);
+  if (str.startsWith("1/")) return 1 / parseFloat(str.slice(2));
+  return parseFloat(str);
+}
+
+// Snaps raw Unsplash exposure_time to the nearest canonical shutter speed
+function snapShutter(exposureTime) {
+  if (!exposureTime) return "";
+  const secs = shutterToSeconds(exposureTime);
+  if (!secs || secs <= 0) return "";
+  return SHUTTER_SPEEDS.reduce((best, curr) => {
+    const bestDist = Math.abs(Math.log2(secs / shutterStrToSecs(best)));
+    const currDist = Math.abs(Math.log2(secs / shutterStrToSecs(curr)));
+    return currDist < bestDist ? curr : best;
+  });
+}
+
 // Returns shutter speed as a decimal number e.g. 1/125 → 0.008
 function shutterToSeconds(exposureTime) {
   if (!exposureTime) return "";
@@ -174,6 +212,73 @@ async function fetchPhoto(id) {
   return res.json();
 }
 
+// ─── AI comment generation ────────────────────────────────────────────────────
+// Generates a completion-screen comment from raw EXIF data + photographer notes.
+// Returns empty string if ANTHROPIC_API_KEY is missing or comment_notes is empty.
+async function generateComment({ commentNotes, altDescription, camera, make, model,
+  focalRaw, apertureRaw, shutterRaw, iso, location, photographer }) {
+  if (!ANTHROPIC_API_KEY || !commentNotes || !commentNotes.trim()) return "";
+
+  const cropFactor = getCropFactor(make, model);
+  const ffEquiv = Math.round(focalRaw * cropFactor / 5) * 5;
+  const cropNote = cropFactor !== 1.0
+    ? `The camera has a ${cropFactor}x crop sensor. The raw focal length is ${focalRaw}mm, making the full-frame equivalent about ${ffEquiv}mm. In your comment, write: "about ${ffEquiv}mm (full frame equivalent after applying ${cropFactor}x crop factor to ${Math.round(focalRaw)}mm)"`
+    : `The camera is full-frame — no crop factor applies. Focal length is ${Math.round(focalRaw)}mm.`;
+
+  const prompt = `You are writing a completion-screen comment for PICCLE, a daily photography guessing game. The player has just finished guessing the camera settings for today's photo.
+
+RAW EXIF DATA (use these values in your comment):
+- Focal length: ${Math.round(focalRaw)}mm
+- ${cropNote}
+- Aperture: f/${apertureRaw}
+- Shutter speed: ${shutterRaw}s
+- ISO: ${iso || "unknown"}
+- Location: ${location || "unknown"}
+- Photographer: ${photographer || "unknown"}
+- Image description: ${altDescription || "unknown"}
+
+PHOTOGRAPHER'S NOTES (use to set emotional register and visual focus):
+${commentNotes}
+
+STYLE RULES — follow every one of these:
+1. EXACTLY 4 sentences. Hard limit.
+2. Do NOT open with "There's something [adjective] about..." — this is forbidden. Start with the most interesting technical fact, the image's emotional core, or the scene itself.
+3. Do NOT end with reflective flourishes: "What stays with me...", "It's the kind of image that...", "Everything here conspires to...", "I love how the settings...". End on the image or the last technical point.
+4. Always explain aperture jargon in parentheses: "fast (low number) aperture" or "slow (high number) aperture".
+5. Explain the WHY behind each setting — what the photographer was trying to achieve.
+6. Do NOT mention the camera model name in your comment.
+7. Do NOT use em dashes (—). Use a space-hyphen-space ( - ) or rewrite with parentheses instead.
+8. Do NOT use the multiplication sign x — write the letter x instead (e.g. "1.5x crop factor").
+9. Only use plain ASCII punctuation. No Unicode symbols above standard quotes and apostrophes.
+10. Do NOT start with "I". Do NOT use the word "perfect". No bullet points or line breaks.
+11. Round all focal lengths to clean numbers in prose — write "105mm" not "103.9mm", "25mm" not "25.3mm".`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 400,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(`Anthropic API ${res.status}: ${JSON.stringify(errBody)}`);
+    }
+    const data = await res.json();
+    return data.content?.[0]?.text?.trim() ?? "";
+  } catch (err) {
+    process.stderr.write(`  ⚠ comment generation failed: ${err.message}\n`);
+    return "";
+  }
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 let rows;
 try {
@@ -187,8 +292,14 @@ try {
 const linkColumn = rows[0]?.link !== undefined ? "link" : Object.keys(rows[0])[0];
 console.log(`Reading ${rows.length} photo(s) from '${linkColumn}' column in ${INPUT_FILE}\n`);
 
+if (ANTHROPIC_API_KEY) {
+  console.log("ANTHROPIC_API_KEY found — comments will be generated for rows with comment_notes.\n");
+} else {
+  console.log("No ANTHROPIC_API_KEY in .env.local — comment column will be empty.\n");
+}
+
 const outputRows = [
-  ["image", "link", "usable_link", "camera", "focal_length", "fl", "aperture_raw", "aperture", "shutter_speed", "ss", "iso", "location", "photographer"],
+  ["image", "link", "usable_link", "camera", "focal_length", "fl", "aperture_raw", "aperture", "shutter_speed", "ss", "iso", "location", "photographer", "comment", "completion_link"],
 ];
 
 let successCount = 0;
@@ -208,16 +319,19 @@ for (let i = 0; i < rows.length; i++) {
   try {
     const data = await fetchPhoto(id);
 
-    const camera       = formatCamera(data.exif?.make ?? "", data.exif?.model ?? "");
+    const make         = data.exif?.make ?? "";
+    const model        = data.exif?.model ?? "";
+    const camera       = formatCamera(make, model);
     const focalRaw     = data.exif?.focal_length ?? "";
     const fl           = snapFocalLength(focalRaw);
     const apertureRaw  = data.exif?.aperture ?? "";
     const aperture     = snapAperture(apertureRaw);
-    const shutter      = formatShutter(data.exif?.exposure_time);
-    const ss           = shutterToSeconds(data.exif?.exposure_time);
+    const shutter      = formatShutter(data.exif?.exposure_time);  // raw EXIF string e.g. "1/200"
+    const ss           = snapShutter(data.exif?.exposure_time);   // snapped game value e.g. "1/250"
     const iso          = data.exif?.iso ?? "";
     const location     = formatLocation(data.location);
     const photographer = data.user?.name ?? "";
+    const altDescription = data.alt_description ?? data.description ?? "";
     // data.urls.regular is the authoritative CDN URL — the short page slug ID is not a valid CDN path
     const usableLink   = data.urls?.regular ?? "";
 
@@ -234,10 +348,31 @@ for (let i = 0; i < rows.length; i++) {
     if (missing.length > 0) {
       console.log(`⚠  ${photographer} — partial EXIF (missing: ${missing.join(", ")})`);
     } else {
-      console.log(`✓  ${photographer} | ${camera} | ${focalRaw}mm→${fl}mm f/${aperture} ${shutter}(${ss}s) ISO${iso}`);
+      console.log(`✓  ${photographer} | ${camera} | ${focalRaw}mm→${fl}mm f/${aperture} ${shutter}→${ss} ISO${iso}`);
     }
 
-    outputRows.push([i + 1, pageUrl, usableLink, camera, focalRaw, fl, apertureRaw, aperture, shutter, ss, iso, location, photographer]);
+    // Use existing comment from links.csv if present; otherwise generate from comment_notes
+    const existingComment = rows[i].comment ?? "";
+    const commentNotes    = rows[i].comment_notes ?? "";
+    let comment = existingComment;
+    if (!comment && commentNotes) {
+      comment = await generateComment({
+        commentNotes, altDescription, camera, make, model,
+        focalRaw, apertureRaw, shutterRaw: shutter, iso, location, photographer,
+      });
+      if (comment) {
+        console.log(`   ✓ comment generated`);
+      } else {
+        console.log(`   ⚠ comment skipped (generation failed or no API key)`);
+      }
+    } else if (existingComment) {
+      console.log(`   ✓ comment taken from links.csv`);
+    }
+
+    // completion_link: use explicit column if set, else fall back to the Unsplash page URL
+    const completionLink = rows[i].completion_link || pageUrl;
+
+    outputRows.push([i + 1, pageUrl, usableLink, camera, focalRaw, fl, apertureRaw, aperture, shutter, ss, iso, location, photographer, comment, completionLink]);
     successCount++;
   } catch (err) {
     console.log(`skipped — ${err.message}`);
