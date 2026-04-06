@@ -42,7 +42,8 @@ function HalfDial({ index, total, ringTotal, uid, majorEvery, shotKey, dialColor
   const R_MAJOR_IN = 40;
 
   const ring           = ringTotal ?? total;
-  const rotDeg         = -(index / ring) * 360;
+  // Positive rotation: increasing index spins dial clockwise (ticks move right)
+  const rotDeg         = (index / ring) * 360;
   // Notch uses feedback color when known, otherwise dial's signature color
   const indicatorColor = feedback ? FEEDBACK_COLOR[feedback] : dialColor;
   const clipId         = `dial-clip-${uid}`;
@@ -51,7 +52,8 @@ function HalfDial({ index, total, ringTotal, uid, majorEvery, shotKey, dialColor
   const tickColor = dialColor + "40"; // 25% opacity hex
 
   const ticks = Array.from({ length: total }, (_, i) => {
-    const angle   = ((i / ring) * 2 * Math.PI) - Math.PI / 2;
+    // Ticks placed counterclockwise so positive rotation keeps index tick at top
+    const angle   = -((i / ring) * 2 * Math.PI) - Math.PI / 2;
     const isMajor = i % majorEvery === 0;
     const rIn     = isMajor ? R_MAJOR_IN : R_MINOR_IN;
     return {
