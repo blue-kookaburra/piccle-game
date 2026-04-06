@@ -5,6 +5,24 @@ import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 
 const VALID_COLORS = new Set(["green", "yellow", "red"]);
 
+// Compute which direction the player should move for each non-green setting
+function computeDirection(
+  guess: { shutter: string; aperture: string; focal: number },
+  answer: { shutter: string; aperture: string; focal: number },
+  feedback: { shutter: string; aperture: string; focal: string }
+) {
+  const shutterDir = feedback.shutter !== "green"
+    ? (SHUTTER_SPEEDS.indexOf(guess.shutter) < SHUTTER_SPEEDS.indexOf(answer.shutter) ? "slower" : "faster")
+    : null;
+  const apertureDir = feedback.aperture !== "green"
+    ? (APERTURES.indexOf(guess.aperture) < APERTURES.indexOf(answer.aperture) ? "narrower" : "wider")
+    : null;
+  const focalDir = feedback.focal !== "green"
+    ? (FOCAL_LENGTHS.indexOf(guess.focal) < FOCAL_LENGTHS.indexOf(answer.focal) ? "longer" : "shorter")
+    : null;
+  return { shutter: shutterDir, aperture: apertureDir, focal: focalDir };
+}
+
 // Module-level cache — survives across requests on a warm serverless instance.
 // Eliminates the Supabase round-trip on every shot after the first.
 const answerCache = new Map<string, {
@@ -166,8 +184,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const direction = computeDirection({ shutter, aperture, focal }, answer, feedback);
+
   return NextResponse.json({
     feedback,
+    direction,
     ...(shouldReveal && {
       answer,
       ...revealData,

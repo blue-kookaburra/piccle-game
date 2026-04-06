@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import PiccleLogo from "@/components/PiccleLogo";
 import ImageViewer from "@/components/ImageViewer";
-import CameraBody from "@/components/CameraBody";
+import CameraBody, { type DirectionHints } from "@/components/CameraBody";
 import AttemptHistory from "@/components/AttemptHistory";
 import ResultCard from "@/components/ResultCard";
 import AboutModal from "@/components/AboutModal";
@@ -95,8 +95,17 @@ export default function Home() {
   const [pendingAttempt, setPendingAttempt] = useState<{ shutter: string; aperture: string; focal: number } | null>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  const [direction, setDirection] = useState<DirectionHints | null>(null);
+  const [proMode, setProMode] = useState(false);
   const dialAnimatedRef = useRef(false);
   const historyRef = useRef<HTMLElement>(null);
+
+  // Load pro mode preference from localStorage
+  useEffect(() => {
+    try {
+      setProMode(localStorage.getItem("piccle_pro_mode") === "true");
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     const localDate = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
@@ -180,6 +189,7 @@ export default function Home() {
       setPendingAttempt(null);
       setAttempts(newAttempts);
       setScore(newScore);
+      if (data.direction) setDirection(data.direction);
       // Scroll history into view so the new attempt row is always visible
       setTimeout(() => {
         historyRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -244,6 +254,23 @@ export default function Home() {
 
   const shotsLeft = MAX_ATTEMPTS - attempts.length;
 
+  function toggleProMode() {
+    const next = !proMode;
+    setProMode(next);
+    try { localStorage.setItem("piccle_pro_mode", String(next)); } catch { /* ignore */ }
+  }
+
+  // Show a direction hint on a dial after 2 consecutive non-green attempts, unless pro mode is on
+  const visibleHints: DirectionHints = (() => {
+    if (proMode || !direction || attempts.length < 2) return {};
+    const last2 = attempts.slice(-2);
+    return {
+      shutter:  last2.every(a => a.feedback.shutter  !== "green") ? (direction.shutter  ?? undefined) : undefined,
+      aperture: last2.every(a => a.feedback.aperture !== "green") ? (direction.aperture ?? undefined) : undefined,
+      focal:    last2.every(a => a.feedback.focal    !== "green") ? (direction.focal    ?? undefined) : undefined,
+    };
+  })();
+
   return (
     <main className="game-layout">
       <header className="game-header">
@@ -254,6 +281,14 @@ export default function Home() {
           )}
           <button className="info-btn" onClick={() => setShowAbout(true)} aria-label="How to play">
             HOW TO PLAY
+          </button>
+          <button
+            className={`pro-mode-btn${proMode ? " pro-mode-btn--active" : ""}`}
+            onClick={toggleProMode}
+            aria-label={proMode ? "Disable pro mode" : "Enable pro mode"}
+            title={proMode ? "Pro mode on — hints hidden" : "Pro mode off — hints shown"}
+          >
+            PRO
           </button>
           <Link href="/stats" className="stats-link" title="Your stats">
             <svg width="18" height="16" viewBox="0 0 18 16" fill="currentColor" aria-hidden="true">
@@ -295,6 +330,7 @@ export default function Home() {
               unsplashUrl={answer.unsplashUrl}
               comment={answer.comment}
               completionLink={answer.completionLink}
+              proMode={proMode}
             />
           </section>
         ) : (
@@ -318,6 +354,7 @@ export default function Home() {
                 attemptsLeft={shotsLeft}
                 shotKey={attempts.length}
                 lastAttemptFeedback={attempts[attempts.length - 1]?.feedback}
+                hints={visibleHints}
               />
             </section>
           </>
