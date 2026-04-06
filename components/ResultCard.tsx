@@ -15,6 +15,7 @@ interface ResultCardProps {
   answer: { shutter: string; aperture: string; focal: number };
   streak: StreakState;
   challengeNumber: number;
+  challengeDate: string;
   shutterOriginal?: string;
   apertureOriginal?: string;
   focalOriginal?: number;
@@ -26,8 +27,14 @@ interface ResultCardProps {
   completionLink?: string;
 }
 
+function formatDate(dateStr: string): string {
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const [year, month, day] = dateStr.split("-");
+  return `${day} ${months[parseInt(month, 10) - 1]} ${year}`;
+}
+
 export default function ResultCard({
-  score, attempts, answer, streak, challengeNumber,
+  score, attempts, answer, streak, challengeNumber, challengeDate,
   shutterOriginal, apertureOriginal, focalOriginal,
   description, credit, solveRate, unsplashUrl, comment, completionLink,
 }: ResultCardProps) {
@@ -68,7 +75,7 @@ export default function ResultCard({
       .map((a) => `${DOT[a.feedback.shutter]}${DOT[a.feedback.aperture]}${DOT[a.feedback.focal]}`)
       .join("\n");
     const streakLine = streak.currentStreak > 1 ? `🔥 ${streak.currentStreak} frames straight` : "";
-    return [`📸 PICCLE — Frame ${challengeNumber}`, rows, `${score}/1000  ${tier.tier}`, streakLine, "piccle.app"]
+    return [`📸 PICCLE — Frame ${formatDate(challengeDate)}`, rows, `${score}/1000  ${tier.tier}`, streakLine, "piccle.io"]
       .filter(Boolean).join("\n");
   }
 
@@ -84,11 +91,11 @@ export default function ResultCard({
   async function handleDownloadImage() {
     setDownloading(true);
     try {
-      const blob = await generateShareCard({ attempts, score, challengeNumber, streak: streak.currentStreak });
+      const blob = await generateShareCard({ attempts, score, challengeNumber, challengeDate, streak: streak.currentStreak });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `piccle-frame-${challengeNumber}.png`;
+      a.download = `piccle-frame-${formatDate(challengeDate)}.png`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -126,9 +133,9 @@ export default function ResultCard({
           {displayScore}
         </motion.div>
         <div className="result-score-label">out of 1000</div>
-        {/* Tier scale — all four tiers, current one highlighted */}
+        {/* Tier scale — all five tiers, current one highlighted */}
         <div className="tier-scale">
-          {(["Tourist", "Keen Amateur", "Pro", "Master"] as const).map((t) => (
+          {(["Tourist", "Enthusiast", "Keen Amateur", "Pro", "Master"] as const).map((t) => (
             <div key={t} className={`tier-scale-item${tier.tier === t ? " tier-scale-item--active" : ""}`}>
               <span className="tier-scale-name">{t}</span>
             </div>
@@ -235,7 +242,7 @@ export default function ResultCard({
           disabled={downloading}
           whileTap={{ scale: 0.97 }}
         >
-          {downloading ? "saving..." : "Save image"}
+          {downloading ? "saving..." : "SAVE"}
         </motion.button>
       </div>
     </motion.div>

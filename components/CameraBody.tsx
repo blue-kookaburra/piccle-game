@@ -27,6 +27,7 @@ const DIAL_COLOR: Record<string, string> = {
 interface HalfDialProps {
   index: number;
   total: number;
+  ringTotal?: number;  // governs angular spacing; defaults to total
   uid: string;
   majorEvery: number;
   shotKey: number;
@@ -34,13 +35,14 @@ interface HalfDialProps {
   feedback?: "green" | "yellow" | "red";
 }
 
-function HalfDial({ index, total, uid, majorEvery, shotKey, dialColor, feedback }: HalfDialProps) {
+function HalfDial({ index, total, ringTotal, uid, majorEvery, shotKey, dialColor, feedback }: HalfDialProps) {
   const R_BODY     = 56;
   const R_TICK_OUT = 51;
   const R_MINOR_IN = 46;
   const R_MAJOR_IN = 40;
 
-  const rotDeg         = -(index / total) * 360;
+  const ring           = ringTotal ?? total;
+  const rotDeg         = -(index / ring) * 360;
   // Notch uses feedback color when known, otherwise dial's signature color
   const indicatorColor = feedback ? FEEDBACK_COLOR[feedback] : dialColor;
   const clipId         = `dial-clip-${uid}`;
@@ -49,7 +51,7 @@ function HalfDial({ index, total, uid, majorEvery, shotKey, dialColor, feedback 
   const tickColor = dialColor + "40"; // 25% opacity hex
 
   const ticks = Array.from({ length: total }, (_, i) => {
-    const angle   = ((i / total) * 2 * Math.PI) - Math.PI / 2;
+    const angle   = ((i / ring) * 2 * Math.PI) - Math.PI / 2;
     const isMajor = i % majorEvery === 0;
     const rIn     = isMajor ? R_MAJOR_IN : R_MINOR_IN;
     return {
@@ -142,6 +144,7 @@ interface DialPickerProps {
   value: string;
   index: number;
   total: number;
+  ringTotal?: number;
   uid: string;
   majorEvery: number;
   shotKey: number;
@@ -153,7 +156,7 @@ interface DialPickerProps {
 }
 
 function DialPicker({
-  label, value, index, total, uid, majorEvery, shotKey, dialColor,
+  label, value, index, total, ringTotal, uid, majorEvery, shotKey, dialColor,
   onDecrement, onIncrement, disabled, feedback,
 }: DialPickerProps) {
   const dragRef = useRef<{ lastX: number; accumulated: number } | null>(null);
@@ -229,6 +232,7 @@ function DialPicker({
         <HalfDial
           index={index}
           total={total}
+          ringTotal={ringTotal}
           uid={uid}
           majorEvery={majorEvery}
           shotKey={shotKey}
@@ -308,12 +312,13 @@ export default function CameraBody({
             feedback={lastAttemptFeedback?.shutter}
           />
           <div className="dial-divider" />
-          {/* Aperture — amber — 1/3-stop increments, major every 3rd = full stop */}
+          {/* Aperture — amber — 28 values, majorEvery=3 marks full stops, ringTotal=30 ensures even 36° spacing */}
           <DialPicker
             label="APERTURE"
             value={APERTURES[apertureIdx]}
             index={apertureIdx}
             total={APERTURES.length}
+            ringTotal={30}
             uid="aperture"
             majorEvery={3}
             shotKey={shotKey}

@@ -4,7 +4,14 @@ interface ShareCardProps {
   attempts: Attempt[];
   score: number;
   challengeNumber: number;
+  challengeDate: string;
   streak: number;
+}
+
+function formatDate(dateStr: string): string {
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const [year, month, day] = dateStr.split("-");
+  return `${day} ${months[parseInt(month, 10) - 1]} ${year}`;
 }
 
 // Instagram Stories: 9:16
@@ -59,7 +66,8 @@ function divider(ctx: CanvasRenderingContext2D, y: number) {
 }
 
 export async function generateShareCard(props: ShareCardProps): Promise<Blob> {
-  const { attempts, score, challengeNumber, streak } = props;
+  const { attempts, score, challengeNumber, challengeDate, streak } = props;
+  const formattedDate = formatDate(challengeDate);
 
   // Ensure web fonts are loaded before rendering
   await document.fonts.ready;
@@ -97,13 +105,13 @@ export async function generateShareCard(props: ShareCardProps): Promise<Blob> {
 
   divider(ctx, LOGO_Y + LOGO_H + 32);
 
-  // ── Frame number ─────────────────────────────────────────────────────
-  ctx.font         = `700 22px 'Azeret Mono', 'Courier New', monospace`;
+  // ── Frame date ───────────────────────────────────────────────────────
+  ctx.font         = `700 44px 'Azeret Mono', 'Courier New', monospace`;
   ctx.letterSpacing = "3px";
   ctx.fillStyle    = GOLD;
   ctx.textBaseline = "middle";
   ctx.textAlign    = "left";
-  ctx.fillText(`FRAME ${challengeNumber}`, MARGIN, 396);
+  ctx.fillText(`PICCLE  ${formattedDate}`, MARGIN, 396);
   ctx.letterSpacing = "0px";
 
   // ── Attempt dot grid ─────────────────────────────────────────────────
@@ -148,21 +156,21 @@ export async function generateShareCard(props: ShareCardProps): Promise<Blob> {
   ctx.fillText(String(score), W / 2, SCORE_CY);
   ctx.letterSpacing = "0px";
 
-  ctx.font         = `400 26px 'Azeret Mono', 'Courier New', monospace`;
+  ctx.font         = `400 48px 'Azeret Mono', 'Courier New', monospace`;
   ctx.fillStyle    = ZONE_7;
   ctx.textBaseline = "middle";
   ctx.textAlign    = "center";
-  ctx.fillText("/ 1000", W / 2, SCORE_CY + 128);
+  ctx.fillText("/ 1000", W / 2, SCORE_CY + 148);
 
   // ── Streak ────────────────────────────────────────────────────────────
   if (streak > 0) {
-    ctx.font         = `700 24px 'Azeret Mono', 'Courier New', monospace`;
+    ctx.font         = `700 44px 'Azeret Mono', 'Courier New', monospace`;
     ctx.letterSpacing = "1px";
     ctx.fillStyle    = GOLD;
     ctx.textAlign    = "center";
     ctx.textBaseline = "middle";
     const streakLabel = streak === 1 ? "1 frame" : `${streak} frames straight`;
-    ctx.fillText(`🔥  ${streakLabel}`, W / 2, SCORE_CY + 204);
+    ctx.fillText(`🔥  ${streakLabel}`, W / 2, SCORE_CY + 240);
     ctx.letterSpacing = "0px";
   }
 
@@ -173,17 +181,17 @@ export async function generateShareCard(props: ShareCardProps): Promise<Blob> {
   // ── Footer ────────────────────────────────────────────────────────────
   const FOOTER_Y = FOOTER_DIV_Y + 80;
 
-  ctx.font         = `italic 400 22px 'Bodoni Moda', Georgia, serif`;
+  ctx.font         = `italic 400 40px 'Bodoni Moda', Georgia, serif`;
   ctx.fillStyle    = ZONE_7;
   ctx.textBaseline = "middle";
   ctx.textAlign    = "left";
   ctx.fillText("develop your eye", MARGIN, FOOTER_Y);
 
-  ctx.font         = `400 20px 'Azeret Mono', 'Courier New', monospace`;
+  ctx.font         = `400 36px 'Azeret Mono', 'Courier New', monospace`;
   ctx.letterSpacing = "1px";
   ctx.fillStyle    = ZONE_7;
   ctx.textAlign    = "right";
-  ctx.fillText("piccle.app", W - MARGIN, FOOTER_Y);
+  ctx.fillText("piccle.io", W - MARGIN, FOOTER_Y);
   ctx.letterSpacing = "0px";
 
   return new Promise((resolve) => {
