@@ -264,14 +264,21 @@ export default function Home() {
     try { localStorage.setItem("piccle_pro_mode", String(next)); } catch { /* ignore */ }
   }
 
-  // Show a direction hint on a dial after 2 consecutive non-green attempts, unless pro mode is on
+  // Show a hint when the last 2 attempts for a setting show no improvement (same or worse colour)
+  function noImprovement(key: "shutter" | "aperture" | "focal"): boolean {
+    if (attempts.length < 2) return false;
+    const rank = (c: FeedbackColor) => c === "green" ? 2 : c === "yellow" ? 1 : 0;
+    const prev = attempts[attempts.length - 2].feedback[key];
+    const last = attempts[attempts.length - 1].feedback[key];
+    return last !== "green" && rank(last) <= rank(prev);
+  }
+
   const visibleHints: DirectionHints = (() => {
-    if (proMode || !direction || attempts.length < 2) return {};
-    const last2 = attempts.slice(-2);
+    if (proMode || !direction) return {};
     return {
-      shutter:  last2.every(a => a.feedback.shutter  !== "green") ? (direction.shutter  ?? undefined) : undefined,
-      aperture: last2.every(a => a.feedback.aperture !== "green") ? (direction.aperture ?? undefined) : undefined,
-      focal:    last2.every(a => a.feedback.focal    !== "green") ? (direction.focal    ?? undefined) : undefined,
+      shutter:  noImprovement("shutter")  ? (direction.shutter  ?? undefined) : undefined,
+      aperture: noImprovement("aperture") ? (direction.aperture ?? undefined) : undefined,
+      focal:    noImprovement("focal")    ? (direction.focal    ?? undefined) : undefined,
     };
   })();
 
