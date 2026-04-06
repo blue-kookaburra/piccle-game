@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { scoreAttempt, type FeedbackColor } from "@/lib/scoring";
 import { getTestChallenge } from "@/lib/test-data";
 
+// Module-level cache — survives across requests on a warm serverless instance.
+// Eliminates the Supabase round-trip on every shot after the first.
+const answerCache = new Map<string, {
+  answer: { shutter: string; aperture: string; focal: number };
+  revealData: {
+    description: string; credit: string;
+    shutterOriginal?: string; apertureOriginal?: string; focalOriginal?: number;
+    unsplashUrl?: string; comment?: string; completionLink?: string;
+  };
+}>();
+
 interface SubmitBody {
   date: string;
   shutter: string;
@@ -28,45 +39,52 @@ export async function POST(req: NextRequest) {
   } | null = null;
 
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    // Supabase path — try to load from DB, fall back to test data if not found
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
+    // Check module-level cache first
+    if (answerCache.has(date)) {
+      const cached = answerCache.get(date)!;
+      answer = cached.answer;
+      revealData = cached.revealData;
+    } else {
+      const { createClient } = await import("@/lib/supabase/server");
+      const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("daily_challenges")
-      .select(`images(
-        shutter_speed, aperture, focal_length,
-        description, credit,
-        camera, iso, photographer, location,
-        shutter_speed_original, focal_length_original,
-        unsplash_url, comment, completion_link
-      )`)
-      .eq("date", date)
-      .single();
+      const { data, error } = await supabase
+        .from("daily_challenges")
+        .select(`images(
+          shutter_speed, aperture, focal_length,
+          description, credit,
+          camera, iso, photographer, location,
+          shutter_speed_original, focal_length_original,
+          unsplash_url, comment, completion_link
+        )`)
+        .eq("date", date)
+        .single();
 
-    if (!error && data?.images) {
-      const img = (Array.isArray(data.images) ? data.images[0] : data.images) as {
-        shutter_speed: string;
-        aperture: string;
-        focal_length: number;
-        description: string;
-        credit: string;
-        shutter_speed_original?: string;
-        focal_length_original?: number;
-        unsplash_url?: string;
-        comment?: string;
-        completion_link?: string;
-      };
-      answer = { shutter: img.shutter_speed, aperture: img.aperture, focal: img.focal_length };
-      revealData = {
-        description: img.description,
-        credit: img.credit,
-        shutterOriginal: img.shutter_speed_original,
-        focalOriginal: img.focal_length_original,
-        unsplashUrl: img.unsplash_url,
-        comment: img.comment,
-        completionLink: img.completion_link,
-      };
+      if (!error && data?.images) {
+        const img = (Array.isArray(data.images) ? data.images[0] : data.images) as {
+          shutter_speed: string;
+          aperture: string;
+          focal_length: number;
+          description: string;
+          credit: string;
+          shutter_speed_original?: string;
+          focal_length_original?: number;
+          unsplash_url?: string;
+          comment?: string;
+          completion_link?: string;
+        };
+        answer = { shutter: img.shutter_speed, aperture: img.aperture, focal: img.focal_length };
+        revealData = {
+          description: img.description,
+          credit: img.credit,
+          shutterOriginal: img.shutter_speed_original,
+          focalOriginal: img.focal_length_original,
+          unsplashUrl: img.unsplash_url,
+          comment: img.comment,
+          completionLink: img.completion_link,
+        };
+        answerCache.set(date, { answer, revealData });
+      }
     }
   }
 

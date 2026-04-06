@@ -462,6 +462,16 @@ body {
   color: var(--zone-mid);
 }
 
+.attempt-setting--pending {
+  color: var(--zone-6);
+  animation: pending-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes pending-pulse {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    CAMERA CONTROLS — The instrument panel
    ═══════════════════════════════════════════════════════════════════ */
@@ -1084,7 +1094,6 @@ body {
   font-weight: 900;
   font-size: 18px;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--zone-9);
 }
 
@@ -1126,7 +1135,7 @@ body {
 .stats-tile-label {
   font-family: var(--font-mono);
   font-size: 9px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -1134,7 +1143,7 @@ body {
 .stats-section-title {
   font-family: var(--font-mono);
   font-size: 8px;
-  color: var(--zone-mid);
+  color: var(--zone-7);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -1169,7 +1178,7 @@ body {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
-  color: var(--correct);
+  color: var(--zone-9);
 }
 
 .accuracy-bar-track {

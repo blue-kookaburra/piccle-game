@@ -92,6 +92,7 @@ export default function Home() {
     lastPlayedDate: "",
   });
   const [firing, setFiring] = useState(false);
+  const [pendingAttempt, setPendingAttempt] = useState<{ shutter: string; aperture: string; focal: number } | null>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const dialAnimatedRef = useRef(false);
@@ -141,6 +142,7 @@ export default function Home() {
     setShowFlash(true);
     setTimeout(() => setShowFlash(false), 160);
     navigator.vibrate?.(50);
+    setPendingAttempt({ shutter: SHUTTER_SPEEDS[shutterIdx], aperture: APERTURES[apertureIdx], focal: FOCAL_LENGTHS[focalIdx] });
 
     const attemptNumber = attempts.length + 1;
     const body = {
@@ -175,6 +177,7 @@ export default function Home() {
       const newScore = score + data.feedback.points;
       const isOver = data.feedback.isCorrect || newAttempts.length >= MAX_ATTEMPTS;
 
+      setPendingAttempt(null);
       setAttempts(newAttempts);
       setScore(newScore);
       // Scroll history into view so the new attempt row is always visible
@@ -213,6 +216,7 @@ export default function Home() {
       });
     } catch (err) {
       console.error("Submit failed", err);
+      setPendingAttempt(null);
     } finally {
       setFiring(false);
     }
@@ -300,7 +304,7 @@ export default function Home() {
           <>
             {/* Attempt history — top of card so it's always visible (Wordle pattern) */}
             <section className="history-section" ref={historyRef}>
-              <AttemptHistory attempts={attempts} maxAttempts={MAX_ATTEMPTS} />
+              <AttemptHistory attempts={attempts} maxAttempts={MAX_ATTEMPTS} pendingAttempt={pendingAttempt} />
             </section>
 
             <section className="camera-section">
