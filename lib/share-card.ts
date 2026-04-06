@@ -38,22 +38,22 @@ async function loadSvgAsImage(svgStr: string): Promise<HTMLImageElement> {
   });
 }
 
-// Zone Scale palette
+// Zone Scale palette — matches globals.css
 const ZONE_0   = "#0c0a09";
-const ZONE_1   = "#161210";
 const ZONE_3   = "#2a2520";
+const ZONE_4   = "#3a322c";
 const ZONE_7   = "#8c7e74";
-const ZONE_9   = "#f2ede7";
-const HOT      = "#ff4800";
-const GOLD     = "#c8952a";
-const CORRECT  = "#27ae60";
-const CLOSE    = "#c8952a";
+const HOT      = "#ff4800";   // --hot-pixel
+// Game feedback colours — matches CameraBody.tsx FEEDBACK_COLOR
+const GREEN    = "#22ff88";
+const YELLOW   = "#ffb800";
+const RED      = "#ff4d5a";
 
-// Feedback dot colors — no red on share card (ambiguous in feeds), wrong = dark
+// Feedback dot colors — exact game palette
 function feedbackDotColor(c: "green" | "yellow" | "red"): string {
-  if (c === "green")  return CORRECT;
-  if (c === "yellow") return CLOSE;
-  return ZONE_3;
+  if (c === "green")  return GREEN;
+  if (c === "yellow") return YELLOW;
+  return RED;
 }
 
 function divider(ctx: CanvasRenderingContext2D, y: number) {
@@ -108,7 +108,7 @@ export async function generateShareCard(props: ShareCardProps): Promise<Blob> {
   // ── Frame date ───────────────────────────────────────────────────────
   ctx.font         = `700 44px 'Azeret Mono', 'Courier New', monospace`;
   ctx.letterSpacing = "3px";
-  ctx.fillStyle    = GOLD;
+  ctx.fillStyle    = ZONE_7;
   ctx.textBaseline = "middle";
   ctx.textAlign    = "left";
   ctx.fillText(`PICCLE  ${formattedDate}`, MARGIN, 396);
@@ -131,11 +131,16 @@ export async function generateShareCard(props: ShareCardProps): Promise<Blob> {
       ctx.arc(cx, rowY, DOT_R, 0, Math.PI * 2);
 
       if (attempt) {
-        const key = (["shutter", "aperture", "focal"] as const)[col];
-        ctx.fillStyle = feedbackDotColor(attempt.feedback[key]);
+        const key   = (["shutter", "aperture", "focal"] as const)[col];
+        const color = feedbackDotColor(attempt.feedback[key]);
+        // Soft glow halo — gives neon feel matching the game UI
+        ctx.shadowColor = color;
+        ctx.shadowBlur  = 18;
+        ctx.fillStyle   = color;
         ctx.fill();
+        ctx.shadowBlur  = 0;
       } else {
-        ctx.strokeStyle = ZONE_3;
+        ctx.strokeStyle = ZONE_4;
         ctx.lineWidth   = 2.5;
         ctx.stroke();
       }
@@ -166,7 +171,7 @@ export async function generateShareCard(props: ShareCardProps): Promise<Blob> {
   if (streak > 0) {
     ctx.font         = `700 44px 'Azeret Mono', 'Courier New', monospace`;
     ctx.letterSpacing = "1px";
-    ctx.fillStyle    = GOLD;
+    ctx.fillStyle    = ZONE_7;
     ctx.textAlign    = "center";
     ctx.textBaseline = "middle";
     const streakLabel = streak === 1 ? "1 frame" : `${streak} frames straight`;

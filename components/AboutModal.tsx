@@ -128,6 +128,31 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <p className="about-subtext">Round pools: 1000 → 500 → 250 → 125 → 60</p>
               </section>
 
+              {/* Pro Mode */}
+              <section className="about-section">
+                <h3 className="about-section-title">Pro Mode</h3>
+                <p className="about-text">
+                  Toggle <strong>PRO</strong> in the header before your first guess. Once you shoot,
+                  the setting locks in for that game.
+                </p>
+                <div className="about-settings">
+                  <div className="about-setting-row">
+                    <span className="about-setting-label">PRO off</span>
+                    <p className="about-setting-desc">
+                      After two consecutive non-green guesses on a setting, a directional hint
+                      appears below the dial — e.g. &ldquo;faster ›&rdquo; or &ldquo;‹ wider&rdquo; — pointing you toward the answer.
+                    </p>
+                  </div>
+                  <div className="about-setting-row">
+                    <span className="about-setting-label">PRO on</span>
+                    <p className="about-setting-desc">
+                      Hints are hidden. You navigate by intuition alone. The game remembers your
+                      choice and starts your next session in the same mode.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
               {/* Details — expandable */}
               <details className="about-details">
                 <summary className="about-details-summary">Details</summary>

@@ -91,7 +91,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px 14px;
+  padding: 14px 16px 12px;
   flex-shrink: 0;
 }
 
@@ -105,7 +105,7 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .streak-badge {
@@ -1287,6 +1287,12 @@ body {
   color: var(--hot-pixel);
   border-color: rgba(255, 72, 0, 0.7);
 }
+.pro-mode-btn--locked {
+  opacity: 0.5;
+  cursor: default;
+}
+.pro-mode-btn--locked:hover { color: var(--zone-5); border-color: var(--zone-2); background: none; }
+.pro-mode-btn--active.pro-mode-btn--locked:hover { color: var(--hot-pixel); border-color: rgba(255, 72, 0, 0.4); background: rgba(255, 72, 0, 0.06); }
 
 /* Direction hint shown below each dial after 2 consecutive non-green attempts */
 .dial-hint {

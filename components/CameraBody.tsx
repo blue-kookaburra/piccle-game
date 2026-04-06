@@ -192,8 +192,8 @@ function DialPicker({
     dragRef.current.accumulated += delta;
     dragRef.current.lastX = e.clientX;
     const STEP = 12; // px of horizontal drag per value step
-    while (dragRef.current.accumulated >= STEP)  { step(-1); dragRef.current.accumulated -= STEP; }
-    while (dragRef.current.accumulated <= -STEP) { step(1);  dragRef.current.accumulated += STEP; }
+    while (dragRef.current.accumulated >= STEP)  { step(1);  dragRef.current.accumulated -= STEP; }
+    while (dragRef.current.accumulated <= -STEP) { step(-1); dragRef.current.accumulated += STEP; }
   }
 
   function handlePointerUp() {

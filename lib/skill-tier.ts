@@ -7,9 +7,9 @@ export interface TierResult {
 }
 
 export function getSkillTier(score: number): TierResult {
-  if (score >= 950) return { tier: "Master",      range: "950–1000", isMaster: true  };
-  if (score >= 750) return { tier: "Artisan",      range: "750–949",  isMaster: false };
-  if (score >= 500) return { tier: "Keen Amateur", range: "500–749",  isMaster: false };
-  if (score >= 250) return { tier: "Enthusiast",   range: "250–499",  isMaster: false };
-  return               { tier: "Tourist",       range: "0–249",    isMaster: false };
+  if (score >= 800) return { tier: "Master",      range: "800–1000", isMaster: true  };
+  if (score >= 600) return { tier: "Artisan",      range: "600–799",  isMaster: false };
+  if (score >= 400) return { tier: "Keen Amateur", range: "400–599",  isMaster: false };
+  if (score >= 200) return { tier: "Enthusiast",   range: "200–399",  isMaster: false };
+  return               { tier: "Tourist",       range: "0–199",    isMaster: false };
 }
