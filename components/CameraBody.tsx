@@ -204,6 +204,7 @@ function DialPicker({
           initial={{ opacity: 0.5, y: -4 }}
           animate={{ opacity: 1,   y:  0 }}
           transition={{ duration: 0.1 }}
+          style={feedback ? { color: FEEDBACK_COLOR[feedback] } : undefined}
         >
           {value}
         </motion.span>

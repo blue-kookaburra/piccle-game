@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { Attempt } from "@/lib/game-state";
 import type { StreakState } from "@/lib/streak";
+import AttemptHistory from "@/components/AttemptHistory";
 import { getSkillTier } from "@/lib/skill-tier";
 import { explainSettings } from "@/lib/explain-settings";
 import { generateShareCard } from "@/lib/share-card";
@@ -111,6 +112,9 @@ export default function ResultCard({
       <div className={`result-outcome${won ? " result-outcome--won" : " result-outcome--lost"}`}>
         {won ? `Correct in ${shotCount} shot${shotCount === 1 ? "" : "s"}!` : "Better luck next time"}
       </div>
+
+      {/* ── Attempt history ── */}
+      <AttemptHistory attempts={attempts} maxAttempts={5} />
 
       {/* ── Score ── */}
       <div className="result-score-block">

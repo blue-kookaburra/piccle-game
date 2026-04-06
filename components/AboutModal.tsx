@@ -76,8 +76,9 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   <div className="about-setting-row">
                     <span className="about-setting-label">Aperture</span>
                     <p className="about-setting-desc">
-                      The iris of the lens. Wide open (f/1.4) isolates your subject in
-                      a creamy blur. Stopped down (f/16) keeps everything sharp, front to back.
+                      The iris of the lens. Fast (low number) apertures — wide open (f/1.4) — isolate
+                      your subject in a creamy blur. Slow (high number) apertures — stopped down (f/16) —
+                      keep everything sharp, front to back.
                     </p>
                   </div>
                   <div className="about-setting-row">
@@ -85,6 +86,12 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <p className="about-setting-desc">
                       The lens's angle of view. 24mm takes in the whole scene.
                       85mm flatters a face. 400mm compresses distance into layers.
+                    </p>
+                  </div>
+                  <div className="about-setting-row">
+                    <span className="about-setting-label">ISO</span>
+                    <p className="about-setting-desc">
+                      ISO is always shown to you — it is not something you need to guess.
                     </p>
                   </div>
                 </div>
@@ -102,12 +109,12 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   <div className="about-score-row">
                     <span className="about-dot about-dot--green" />
                     <span className="about-score-label">Green — exact value</span>
-                    <span className="about-score-pts">⅓ of round pool</span>
+                    <span className="about-score-pts">33% of round pool</span>
                   </div>
                   <div className="about-score-row">
                     <span className="about-dot about-dot--yellow" />
                     <span className="about-score-label">Yellow — within 2 clicks</span>
-                    <span className="about-score-pts">10% of pool</span>
+                    <span className="about-score-pts">10% of round pool</span>
                   </div>
                   <div className="about-score-row">
                     <span className="about-dot about-dot--red" />
@@ -134,9 +141,17 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   <div className="about-detail-item">
                     <span className="about-detail-label">Crop sensors</span>
                     <p className="about-detail-text">
-                      All focal lengths are full-frame equivalents. If a shot was taken on an APS-C
-                      body with a 35mm lens, the answer reflects the full-frame equivalent (~52mm)
-                      — not the physical focal length stamped on the lens.
+                      Focal length answers are the number stamped on the lens — not full-frame
+                      equivalents. If a shot was taken on an APS-C body with a 35mm lens, the
+                      answer is 35mm. The crop factor of the camera is noted in each challenge.
+                    </p>
+                  </div>
+                  <div className="about-detail-item">
+                    <span className="about-detail-label">Snapping</span>
+                    <p className="about-detail-text">
+                      Camera settings don&apos;t always land exactly on a standard value. Where the
+                      original image data (EXIF data) falls between two options, the answer is snapped to the
+                      nearest value available on Piccle's dials.
                     </p>
                   </div>
                   <div className="about-detail-item">
