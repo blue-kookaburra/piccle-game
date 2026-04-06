@@ -61,7 +61,7 @@ FOCAL_LENGTHS:  20 values, 10mm → 400mm
 
 Dial tick marks:
 - **Shutter / Focal**: `majorEvery={2}` — alternating major/minor
-- **Aperture**: `majorEvery={3}` — major tick every 3rd value = full stop
+- **Aperture**: `majorEvery={3}`, `ringTotal={30}` — major tick every full stop; ringTotal=30 (vs 28 real values) gives a 2-slot dead zone so all 10 major ticks land exactly 36° apart
 
 ## Scoring system
 

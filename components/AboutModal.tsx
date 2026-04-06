@@ -52,13 +52,13 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               {/* What is Piccle */}
               <section className="about-section">
                 <p className="about-text">
-                  The global photography community has amazing photographers who produce incredible images.
-                  Every day, Piccle serves up a handpicked frame to analyse.
+                The world is full of breathtaking shots, but how were they captured? 
+                Every day, Piccle challenges you to deconstruct a handpicked image from the global photography community..
                 </p>
                 <p className="about-text">
-                Every image is a window into how a photographer read the moment.
-                Shutter speed, aperture and focal length are key choices that created it.
-                Your job is to reverse-engineer them to develop your eye for balancing scenes, subjects, shapes and light.
+                An image is more than just a moment; it is a series of deliberate decisions. 
+                Your mission is to reverse-engineer the shutter speed, aperture, and focal length that brought the scene to life. 
+                By decoding these secrets, you will sharpen your intuition for light, scenes and shapes.
                 </p>
               </section>
 
@@ -69,29 +69,32 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   <div className="about-setting-row">
                     <span className="about-setting-label">Shutter Speed</span>
                     <p className="about-setting-desc">
-                      How long the sensor drinks in light. Fast (1/1000s) freezes motion.
+                      How long the sensor drinks in light. Fast (1/2000s) freezes motion.
                       Slow (1s) trails it — and lets in far more light.
                     </p>
                   </div>
                   <div className="about-setting-row">
                     <span className="about-setting-label">Aperture</span>
                     <p className="about-setting-desc">
-                      The iris of the lens. Fast (low number) apertures — wide open (f/1.4) — isolate
-                      your subject in a creamy blur. Slow (high number) apertures — stopped down (f/16) —
-                      keep everything sharp, front to back.
+                      The iris of the lens. Wide open or 'fast' apertures (low number, f/1.4) isolate
+                      your subject in a creamy blur. 
+                      Stopped down or 'slow' apertures (high number, f/16) keep everything sharp, front to back.
                     </p>
                   </div>
                   <div className="about-setting-row">
                     <span className="about-setting-label">Focal Length</span>
                     <p className="about-setting-desc">
-                      The lens's angle of view. 24mm takes in the whole scene.
-                      85mm flatters a face. 400mm compresses distance into layers.
+                      The lens's angle of view. 24mm takes in the whole scene and makes its elements feel further apart.
+                      85mm flatters a face. 400mm brings far-away subjects right up close and compresses distance into layers.
                     </p>
                   </div>
                   <div className="about-setting-row">
                     <span className="about-setting-label">ISO</span>
                     <p className="about-setting-desc">
-                      ISO is always shown to you — it is not something you need to guess.
+                      The sensor&apos;s sensitivity to light. Low ISO (100) is clean but needs plenty of light.
+                      High ISO (3200+) works in the dark but adds grain. ISO is always shown to you — use
+                      it as a clue. A high ISO tells you the photographer was fighting low light, which
+                      in turn hints at a slow shutter speed or wide aperture to compensate.
                     </p>
                   </div>
                 </div>
@@ -150,7 +153,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <span className="about-detail-label">Snapping</span>
                     <p className="about-detail-text">
                       Camera settings don&apos;t always land exactly on a standard value. Where the
-                      original image data (EXIF data) falls between two options, the answer is snapped to the
+                      original image data (EXIF data) falls between two options, the answer is 'snapped' to the
                       nearest value available on Piccle's dials.
                     </p>
                   </div>

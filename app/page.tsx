@@ -285,6 +285,7 @@ export default function Home() {
               answer={answer}
               streak={streak}
               challengeNumber={daily.challengeNumber}
+              challengeDate={daily.challengeDate}
               description={answer.description ?? daily.description}
               credit={answer.credit ?? daily.credit}
               shutterOriginal={answer.shutterOriginal}
