@@ -9,7 +9,12 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   // Use the client's local date (sent as ?date=YYYY-MM-DD) so the challenge
   // resets at midnight in the player's timezone, not midnight UTC.
-  const today = req.nextUrl.searchParams.get("date") ?? new Date().toISOString().split("T")[0];
+  const rawDate = req.nextUrl.searchParams.get("date") ?? new Date().toISOString().split("T")[0];
+  // Reject anything that isn't a plain YYYY-MM-DD date
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+    return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+  }
+  const today = rawDate;
 
   // If no Supabase is configured, use test data
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
