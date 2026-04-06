@@ -63,6 +63,13 @@ Dial tick marks:
 - **Shutter / Focal**: `majorEvery={2}` — alternating major/minor
 - **Aperture**: `majorEvery={3}`, `ringTotal={30}` — major tick every full stop; ringTotal=30 (vs 28 real values) gives a 2-slot dead zone so all 10 major ticks land exactly 36° apart
 
+## Pro Mode
+
+- **What it does:** Hides directional hints (e.g. "faster ›", "‹ wider") on the dials. Hints are shown in normal mode after 2 consecutive non-green attempts for that setting.
+- **Lock-in rule:** Pro mode can only be toggled **before the first guess**. Once the player fires their first shot, the PRO button is disabled (dimmed, `cursor: default`) for the rest of that game. This prevents switching mid-game to gain hints.
+- **Persistence:** The toggle state is saved to `localStorage` key `piccle_pro_mode`. The next day's game defaults to whatever setting the player last used — so a player who finished in pro mode starts the next game in pro mode automatically.
+- **UI state classes:** `.pro-mode-btn--active` (on), `.pro-mode-btn--locked` (locked after attempt 1), both can coexist.
+
 ## Scoring system
 
 **Colour thresholds** (logarithmic stop distance):

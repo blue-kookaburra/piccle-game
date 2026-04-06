@@ -254,7 +254,11 @@ export default function Home() {
 
   const shotsLeft = MAX_ATTEMPTS - attempts.length;
 
+  // Locked in once the first attempt is made
+  const proModeLocked = attempts.length > 0;
+
   function toggleProMode() {
+    if (proModeLocked) return;
     const next = !proMode;
     setProMode(next);
     try { localStorage.setItem("piccle_pro_mode", String(next)); } catch { /* ignore */ }
@@ -280,13 +284,14 @@ export default function Home() {
             <span className="streak-badge">🔥 {streak.currentStreak}</span>
           )}
           <button className="info-btn" onClick={() => setShowAbout(true)} aria-label="How to play">
-            HOW TO PLAY
+            HOW TO
           </button>
           <button
-            className={`pro-mode-btn${proMode ? " pro-mode-btn--active" : ""}`}
+            className={`pro-mode-btn${proMode ? " pro-mode-btn--active" : ""}${proModeLocked ? " pro-mode-btn--locked" : ""}`}
             onClick={toggleProMode}
+            disabled={proModeLocked}
             aria-label={proMode ? "Disable pro mode" : "Enable pro mode"}
-            title={proMode ? "Pro mode on — hints hidden" : "Pro mode off — hints shown"}
+            title={proModeLocked ? `Pro mode locked (${proMode ? "on" : "off"}) — can only change before your first guess` : proMode ? "Pro mode on — hints hidden" : "Pro mode off — hints shown"}
           >
             PRO
           </button>
