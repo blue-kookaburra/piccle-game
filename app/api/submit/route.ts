@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scoreAttempt, type FeedbackColor } from "@/lib/scoring";
 import { getTestChallenge } from "@/lib/test-data";
+import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
+
+const VALID_COLORS = new Set(["green", "yellow", "red"]);
 
 // Module-level cache — survives across requests on a warm serverless instance.
 // Eliminates the Supabase round-trip on every shot after the first.
@@ -25,6 +28,30 @@ interface SubmitBody {
 export async function POST(req: NextRequest) {
   const body: SubmitBody = await req.json();
   const { date, shutter, aperture, focal, attemptNumber, previousBestColors } = body;
+
+  // --- Input validation ---
+  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+  }
+  if (!SHUTTER_SPEEDS.includes(shutter)) {
+    return NextResponse.json({ error: "Invalid shutter speed" }, { status: 400 });
+  }
+  if (!APERTURES.includes(aperture)) {
+    return NextResponse.json({ error: "Invalid aperture" }, { status: 400 });
+  }
+  if (!FOCAL_LENGTHS.includes(focal)) {
+    return NextResponse.json({ error: "Invalid focal length" }, { status: 400 });
+  }
+  if (!Number.isInteger(attemptNumber) || attemptNumber < 1 || attemptNumber > 5) {
+    return NextResponse.json({ error: "Invalid attempt number" }, { status: 400 });
+  }
+  if (previousBestColors !== undefined) {
+    const { shutter: ps, aperture: pa, focal: pf } = previousBestColors;
+    if (!VALID_COLORS.has(ps) || !VALID_COLORS.has(pa) || !VALID_COLORS.has(pf)) {
+      return NextResponse.json({ error: "Invalid previousBestColors" }, { status: 400 });
+    }
+  }
+  // --- End validation ---
 
   let answer: { shutter: string; aperture: string; focal: number } | null = null;
   let revealData: {
