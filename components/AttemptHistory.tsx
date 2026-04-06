@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Attempt } from "@/lib/game-state";
 
 interface AttemptHistoryProps {
   attempts: Attempt[];
   maxAttempts?: number;
+  pendingAttempt?: { shutter: string; aperture: string; focal: number } | null;
 }
 
 type FeedbackColor = "green" | "yellow" | "red";
@@ -49,8 +50,13 @@ function AttemptBox({ attempt, index }: { attempt: Attempt | null; index: number
   );
 }
 
-export default function AttemptHistory({ attempts, maxAttempts = 5 }: AttemptHistoryProps) {
+export default function AttemptHistory({ attempts, maxAttempts = 5, pendingAttempt }: AttemptHistoryProps) {
   const [open, setOpen] = useState(false);
+
+  // Auto-open drawer when a shot is fired so the pending row is visible
+  useEffect(() => {
+    if (pendingAttempt) setOpen(true);
+  }, [pendingAttempt]);
 
   const slots = Array.from({ length: maxAttempts }, (_, i) => attempts[i] ?? null);
 
@@ -121,20 +127,46 @@ export default function AttemptHistory({ attempts, maxAttempts = 5 }: AttemptHis
                 </motion.div>
               ))}
 
-              {Array.from({ length: maxAttempts - attempts.length }).map((_, i) => (
+              {/* Pending row — shown immediately on shoot while waiting for server */}
+              <AnimatePresence>
+                {pendingAttempt && (
+                  <motion.div
+                    key="pending"
+                    className="attempt-row attempt-row--pending"
+                    style={{ background: attempts.length % 2 === 0 ? "var(--zone-1)" : "var(--zone-2)" }}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <span className="attempt-num">{attempts.length + 1}</span>
+                    <div className="attempt-settings">
+                      <span className="attempt-setting attempt-setting--pending">{pendingAttempt.shutter}</span>
+                      <span className="attempt-setting attempt-setting--pending">{pendingAttempt.aperture}</span>
+                      <span className="attempt-setting attempt-setting--pending">{pendingAttempt.focal}mm</span>
+                    </div>
+                    <span className="attempt-pts attempt-pts--zero">…</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {Array.from({ length: maxAttempts - attempts.length - (pendingAttempt ? 1 : 0) }).map((_, i) => {
+                const offset = attempts.length + (pendingAttempt ? 1 : 0) + i;
+                return (
                 <div
                   key={`empty-${i}`}
                   className="attempt-row attempt-row--empty"
-                  style={{ background: (attempts.length + i) % 2 === 0 ? "var(--zone-1)" : "var(--zone-2)" }}
+                  style={{ background: offset % 2 === 0 ? "var(--zone-1)" : "var(--zone-2)" }}
                 >
-                  <span className="attempt-num">{attempts.length + i + 1}</span>
+                  <span className="attempt-num">{offset + 1}</span>
                   <div className="attempt-settings">
                     <span className="attempt-setting" style={{ color: "var(--zone-3)" }}>——</span>
                     <span className="attempt-setting" style={{ color: "var(--zone-3)" }}>——</span>
                     <span className="attempt-setting" style={{ color: "var(--zone-3)" }}>——</span>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </motion.div>
         )}

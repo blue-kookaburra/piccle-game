@@ -155,7 +155,7 @@ export default function ResultCard({
         <div className="result-settings-values">
           <div className="result-setting-item">
             <span className="rsi-value">{answer.shutter}</span>
-            <span className="rsi-label">Shutter</span>
+            <span className="rsi-label">Shutter Speed</span>
             {shutterOriginal && shutterOriginal !== answer.shutter && (
               <span className="rsi-original">EXIF {shutterOriginal}</span>
             )}
@@ -169,7 +169,7 @@ export default function ResultCard({
           </div>
           <div className="result-setting-item">
             <span className="rsi-value">{answer.focal}mm</span>
-            <span className="rsi-label">Focal</span>
+            <span className="rsi-label">Focal Length</span>
             {focalOriginal !== undefined && focalOriginal !== answer.focal && (
               <span className="rsi-original">EXIF {focalOriginal}mm</span>
             )}
