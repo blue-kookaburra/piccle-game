@@ -126,9 +126,14 @@ export default function ResultCard({
           {displayScore}
         </motion.div>
         <div className="result-score-label">out of 1000</div>
-        <span className={`skill-tier-badge${tier.isMaster ? " skill-tier-badge--master" : ""}`}>
-          {tier.tier}
-        </span>
+        {/* Tier scale — all four tiers, current one highlighted */}
+        <div className="tier-scale">
+          {(["Tourist", "Keen Amateur", "Pro", "Master"] as const).map((t) => (
+            <div key={t} className={`tier-scale-item${tier.tier === t ? " tier-scale-item--active" : ""}`}>
+              <span className="tier-scale-name">{t}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── Streak ── */}
@@ -222,7 +227,7 @@ export default function ResultCard({
           onClick={handleShareText}
           whileTap={{ scale: 0.97 }}
         >
-          Show your work
+          SHARE
         </motion.button>
         <motion.button
           className="share-btn share-btn--secondary"
