@@ -25,6 +25,7 @@ interface ResultCardProps {
   unsplashUrl?: string;
   comment?: string;
   completionLink?: string;
+  proMode?: boolean;
 }
 
 function formatDate(dateStr: string): string {
@@ -37,6 +38,7 @@ export default function ResultCard({
   score, attempts, answer, streak, challengeNumber, challengeDate,
   shutterOriginal, apertureOriginal, focalOriginal,
   description, credit, solveRate, unsplashUrl, comment, completionLink,
+  proMode,
 }: ResultCardProps) {
   const [displayScore, setDisplayScore] = useState(0);
   const [flashed, setFlashed]           = useState(false);
@@ -75,7 +77,8 @@ export default function ResultCard({
       .map((a) => `${DOT[a.feedback.shutter]}${DOT[a.feedback.aperture]}${DOT[a.feedback.focal]}`)
       .join("\n");
     const streakLine = streak.currentStreak > 1 ? `🔥 ${streak.currentStreak} frames straight` : "";
-    return [`📸 PICCLE — Frame ${formatDate(challengeDate)}`, rows, `${score}/1000  ${tier.tier}`, streakLine, "piccle.io"]
+    const proLine = proMode ? "⚡ PRO MODE" : "";
+    return [`📸 PICCLE — Frame ${formatDate(challengeDate)}`, rows, `${score}/1000  ${tier.tier}`, streakLine, proLine, "piccle.io"]
       .filter(Boolean).join("\n");
   }
 
@@ -135,7 +138,7 @@ export default function ResultCard({
         <div className="result-score-label">out of 1000</div>
         {/* Tier scale — all five tiers, current one highlighted */}
         <div className="tier-scale">
-          {(["Tourist", "Enthusiast", "Keen Amateur", "Pro", "Master"] as const).map((t) => (
+          {(["Tourist", "Enthusiast", "Keen Amateur", "Artisan", "Master"] as const).map((t) => (
             <div key={t} className={`tier-scale-item${tier.tier === t ? " tier-scale-item--active" : ""}`}>
               <span className="tier-scale-name">{t}</span>
             </div>

@@ -153,11 +153,22 @@ interface DialPickerProps {
   onIncrement: () => void;
   disabled?: boolean;
   feedback?: "green" | "yellow" | "red";
+  hint?: string;
 }
+
+// Maps hint string to a display label with arrow indicating which way to drag
+const HINT_LABELS: Record<string, string> = {
+  faster:   "‹ faster",
+  slower:   "slower ›",
+  wider:    "‹ wider",
+  narrower: "narrower ›",
+  shorter:  "‹ shorter",
+  longer:   "longer ›",
+};
 
 function DialPicker({
   label, value, index, total, ringTotal, uid, majorEvery, shotKey, dialColor,
-  onDecrement, onIncrement, disabled, feedback,
+  onDecrement, onIncrement, disabled, feedback, hint,
 }: DialPickerProps) {
   const dragRef = useRef<{ lastX: number; accumulated: number } | null>(null);
 
@@ -240,6 +251,11 @@ function DialPicker({
           feedback={feedback}
         />
       </div>
+
+      {/* Direction hint — shown after 2 consecutive non-green attempts */}
+      <div className="dial-hint" aria-live="polite">
+        {hint ? HINT_LABELS[hint] ?? hint : ""}
+      </div>
     </div>
   );
 }
@@ -272,6 +288,12 @@ function ShotCounter({ value }: { value: number }) {
 
 // ─── CameraBody ──────────────────────────────────────────────────────────────
 
+export interface DirectionHints {
+  shutter?: string | null;
+  aperture?: string | null;
+  focal?: string | null;
+}
+
 interface CameraBodyProps {
   shutterIdx: number;
   apertureIdx: number;
@@ -285,12 +307,13 @@ interface CameraBodyProps {
   attemptsLeft: number;
   lastAttemptFeedback?: AttemptFeedback;
   shotKey: number;
+  hints?: DirectionHints;
 }
 
 export default function CameraBody({
   shutterIdx, apertureIdx, focalIdx,
   onShutterChange, onApertureChange, onFocalChange,
-  onFire, disabled, firing, attemptsLeft, lastAttemptFeedback, shotKey,
+  onFire, disabled, firing, attemptsLeft, lastAttemptFeedback, shotKey, hints,
 }: CameraBodyProps) {
   return (
     <div className="camera-controls">
@@ -310,6 +333,7 @@ export default function CameraBody({
             onIncrement={() => onShutterChange(shutterIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.shutter}
+            hint={hints?.shutter ?? undefined}
           />
           <div className="dial-divider" />
           {/* Aperture — amber — 28 values, majorEvery=3 marks full stops, ringTotal=30 ensures even 36° spacing */}
@@ -327,6 +351,7 @@ export default function CameraBody({
             onIncrement={() => onApertureChange(apertureIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.aperture}
+            hint={hints?.aperture ?? undefined}
           />
           <div className="dial-divider" />
           {/* Focal length — coral — not even stops, alternate major/minor */}
@@ -343,6 +368,7 @@ export default function CameraBody({
             onIncrement={() => onFocalChange(focalIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.focal}
+            hint={hints?.focal ?? undefined}
           />
         </div>
       </div>
