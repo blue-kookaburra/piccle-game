@@ -252,12 +252,8 @@ export default function Home() {
           {streak.currentStreak > 0 && (
             <span className="streak-badge">🔥 {streak.currentStreak}</span>
           )}
-          <button className="info-btn" onClick={() => setShowAbout(true)} aria-label="About Piccle">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-              <circle cx="8" cy="8" r="6.5"/>
-              <line x1="8" y1="7.5" x2="8" y2="11.5" strokeLinecap="round"/>
-              <circle cx="8" cy="4.75" r="0.85" fill="currentColor" stroke="none"/>
-            </svg>
+          <button className="info-btn" onClick={() => setShowAbout(true)} aria-label="How to play">
+            HOW TO PLAY
           </button>
           <Link href="/stats" className="stats-link" title="Your stats">
             <svg width="18" height="16" viewBox="0 0 18 16" fill="currentColor" aria-hidden="true">
