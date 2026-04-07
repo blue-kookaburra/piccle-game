@@ -52,13 +52,13 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               {/* What is Piccle */}
               <section className="about-section">
                 <p className="about-text">
-                The world is full of breathtaking shots, but how were they captured? 
-                Every day, Piccle challenges you to deconstruct a handpicked image from the global photography community..
+                The world is full of breathtaking shots, but how were they captured?
+                Every day, Piccle challenges you to deconstruct a handpicked image from the global photography community.
                 </p>
                 <p className="about-text">
-                An image is more than just a moment; it is a series of deliberate decisions. 
-                Your mission is to reverse-engineer the shutter speed, aperture, and focal length that brought the scene to life. 
-                By decoding these secrets, you will sharpen your intuition for light, scenes and shapes.
+                An image is a series of deliberate decisions.
+                Your mission is to reverse-engineer the shutter speed, aperture, and focal length that brought the scene to life.
+                Decoding these settings will sharpen your intuition for the right settings to nail your next shot.
                 </p>
               </section>
 
@@ -93,8 +93,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                     <p className="about-setting-desc">
                       The sensor&apos;s sensitivity to light. Low ISO (100) is clean but needs plenty of light.
                       High ISO (3200+) works in the dark but adds grain. ISO is always shown to you — use
-                      it as a clue. A high ISO tells you the photographer was fighting low light, which
-                      in turn hints at a slow shutter speed or wide aperture to compensate.
+                      it as a clue.
                     </p>
                   </div>
                 </div>
