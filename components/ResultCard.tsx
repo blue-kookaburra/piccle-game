@@ -8,6 +8,8 @@ import AttemptHistory from "@/components/AttemptHistory";
 import { getSkillTier } from "@/lib/skill-tier";
 import { explainSettings } from "@/lib/explain-settings";
 import { generateShareCard } from "@/lib/share-card";
+import { formatDate } from "@/lib/date-utils";
+import { track } from "@/lib/analytics";
 
 interface ResultCardProps {
   score: number;
@@ -26,12 +28,6 @@ interface ResultCardProps {
   comment?: string;
   completionLink?: string;
   proMode?: boolean;
-}
-
-function formatDate(dateStr: string): string {
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const [year, month, day] = dateStr.split("-");
-  return `${day} ${months[parseInt(month, 10) - 1]} ${year}`;
 }
 
 export default function ResultCard({
@@ -89,6 +85,7 @@ export default function ResultCard({
     } else {
       await navigator.clipboard.writeText(text);
     }
+    track("share_text_copied", { score, challengeNumber });
   }
 
   async function handleDownloadImage() {
@@ -101,6 +98,7 @@ export default function ResultCard({
       a.download = `piccle-frame-${formatDate(challengeDate)}.png`;
       a.click();
       URL.revokeObjectURL(url);
+      track("share_card_saved", { score, challengeNumber });
     } catch (err) {
       console.error("Share card failed", err);
     } finally {

@@ -4,12 +4,9 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 import type { AttemptFeedback } from "@/lib/scoring";
+import { FEEDBACK_COLORS } from "@/lib/colors";
 
-const FEEDBACK_COLOR: Record<"green" | "yellow" | "red", string> = {
-  green:  "#22ff88",
-  yellow: "#ffb800",
-  red:    "#ff4d5a",
-};
+const FEEDBACK_COLOR = FEEDBACK_COLORS;
 
 // Per-parameter identity colors — deliberately distinct from G/Y/R feedback
 const DIAL_COLOR: Record<string, string> = {
@@ -32,10 +29,11 @@ interface HalfDialProps {
   majorEvery: number;
   shotKey: number;
   dialColor: string;
-  feedback?: "green" | "yellow" | "red";
+  feedback?: "green" | "yellow" | "red";       // last-shot colour — drives glow ring only
+  currentFeedback?: "green" | "yellow" | "red"; // colour for the currently shown value
 }
 
-function HalfDial({ index, total, ringTotal, uid, majorEvery, shotKey, dialColor, feedback }: HalfDialProps) {
+function HalfDial({ index, total, ringTotal, uid, majorEvery, shotKey, dialColor, feedback, currentFeedback }: HalfDialProps) {
   const R_BODY     = 56;
   const R_TICK_OUT = 51;
   const R_MINOR_IN = 46;
@@ -44,8 +42,8 @@ function HalfDial({ index, total, ringTotal, uid, majorEvery, shotKey, dialColor
   const ring           = ringTotal ?? total;
   // Positive rotation: increasing index spins dial clockwise (ticks move right)
   const rotDeg         = (index / ring) * 360;
-  // Notch uses feedback color when known, otherwise dial's signature color
-  const indicatorColor = feedback ? FEEDBACK_COLOR[feedback] : dialColor;
+  // Notch uses current-value feedback colour when known, otherwise dial's signature colour
+  const indicatorColor = currentFeedback ? FEEDBACK_COLOR[currentFeedback] : dialColor;
   const clipId         = `dial-clip-${uid}`;
 
   // Glowing major ticks in the dial's signature color (very subtle)
@@ -154,7 +152,8 @@ interface DialPickerProps {
   onDecrement: () => void;
   onIncrement: () => void;
   disabled?: boolean;
-  feedback?: "green" | "yellow" | "red";
+  feedback?: "green" | "yellow" | "red";           // last-shot colour for glow animation
+  guessedColors?: Record<string, "green" | "yellow" | "red">; // map of guessed values → best colour
   hint?: string;
 }
 
@@ -170,8 +169,10 @@ const HINT_LABELS: Record<string, string> = {
 
 function DialPicker({
   label, value, index, total, ringTotal, uid, majorEvery, shotKey, dialColor,
-  onDecrement, onIncrement, disabled, feedback, hint,
+  onDecrement, onIncrement, disabled, feedback, guessedColors, hint,
 }: DialPickerProps) {
+  // Colour for the currently displayed value: R/Y/G if guessed, else undefined (→ dial colour)
+  const currentFeedback = guessedColors?.[value] as "green" | "yellow" | "red" | undefined;
   const dragRef = useRef<{ lastX: number; accumulated: number } | null>(null);
 
   function step(dir: 1 | -1) {
@@ -220,7 +221,7 @@ function DialPicker({
           initial={{ opacity: 0.5, y: -4 }}
           animate={{ opacity: 1,   y:  0 }}
           transition={{ duration: 0.1 }}
-          style={feedback ? { color: FEEDBACK_COLOR[feedback] } : undefined}
+          style={currentFeedback ? { color: FEEDBACK_COLOR[currentFeedback] } : undefined}
         >
           {value}
         </motion.span>
@@ -251,6 +252,7 @@ function DialPicker({
           shotKey={shotKey}
           dialColor={dialColor}
           feedback={feedback}
+          currentFeedback={currentFeedback}
         />
       </div>
 
@@ -310,12 +312,17 @@ interface CameraBodyProps {
   lastAttemptFeedback?: AttemptFeedback;
   shotKey: number;
   hints?: DirectionHints;
+  guessedColors?: {
+    shutter:  Record<string, "green" | "yellow" | "red">;
+    aperture: Record<string, "green" | "yellow" | "red">;
+    focal:    Record<string, "green" | "yellow" | "red">;
+  };
 }
 
 export default function CameraBody({
   shutterIdx, apertureIdx, focalIdx,
   onShutterChange, onApertureChange, onFocalChange,
-  onFire, disabled, firing, attemptsLeft, lastAttemptFeedback, shotKey, hints,
+  onFire, disabled, firing, attemptsLeft, lastAttemptFeedback, shotKey, hints, guessedColors,
 }: CameraBodyProps) {
   return (
     <div className="camera-controls">
@@ -335,6 +342,7 @@ export default function CameraBody({
             onIncrement={() => onShutterChange(shutterIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.shutter}
+            guessedColors={guessedColors?.shutter}
             hint={hints?.shutter ?? undefined}
           />
           <div className="dial-divider" />
@@ -353,6 +361,7 @@ export default function CameraBody({
             onIncrement={() => onApertureChange(apertureIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.aperture}
+            guessedColors={guessedColors?.aperture}
             hint={hints?.aperture ?? undefined}
           />
           <div className="dial-divider" />
@@ -370,6 +379,7 @@ export default function CameraBody({
             onIncrement={() => onFocalChange(focalIdx + 1)}
             disabled={disabled}
             feedback={lastAttemptFeedback?.focal}
+            guessedColors={guessedColors?.focal}
             hint={hints?.focal ?? undefined}
           />
         </div>

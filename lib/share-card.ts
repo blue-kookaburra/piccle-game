@@ -1,4 +1,6 @@
 import type { Attempt } from "./game-state";
+import { formatDate } from "./date-utils";
+import { FEEDBACK_COLORS } from "./colors";
 
 interface ShareCardProps {
   attempts: Attempt[];
@@ -6,12 +8,6 @@ interface ShareCardProps {
   challengeNumber: number;
   challengeDate: string;
   streak: number;
-}
-
-function formatDate(dateStr: string): string {
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const [year, month, day] = dateStr.split("-");
-  return `${day} ${months[parseInt(month, 10) - 1]} ${year}`;
 }
 
 // Instagram Stories: 9:16
@@ -44,16 +40,9 @@ const ZONE_3   = "#2a2520";
 const ZONE_4   = "#3a322c";
 const ZONE_7   = "#8c7e74";
 const HOT      = "#ffe566";   // --hot-pixel (lamp gold)
-// Game feedback colours — matches CameraBody.tsx FEEDBACK_COLOR
-const GREEN    = "#22ff88";
-const YELLOW   = "#ffb800";
-const RED      = "#ff4d5a";
 
-// Feedback dot colors — exact game palette
 function feedbackDotColor(c: "green" | "yellow" | "red"): string {
-  if (c === "green")  return GREEN;
-  if (c === "yellow") return YELLOW;
-  return RED;
+  return FEEDBACK_COLORS[c];
 }
 
 function divider(ctx: CanvasRenderingContext2D, y: number) {

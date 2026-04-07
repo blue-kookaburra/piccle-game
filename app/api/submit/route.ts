@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scoreAttempt, type FeedbackColor } from "@/lib/scoring";
+import { isRateLimited } from "@/lib/rate-limit";
 import { getTestChallenge } from "@/lib/test-data";
 import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 
@@ -44,6 +45,11 @@ interface SubmitBody {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anon";
+  if (isRateLimited(`submit:${ip}`, 20, 60_000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const body: SubmitBody = await req.json();
   const { date, shutter, aperture, focal, attemptNumber, previousBestColors } = body;
 

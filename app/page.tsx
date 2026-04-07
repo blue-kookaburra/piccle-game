@@ -12,6 +12,7 @@ import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 import { getGameState, saveGameState, type Attempt, type RevealedAnswer } from "@/lib/game-state";
 import { getStreak, updateStreak, type StreakState } from "@/lib/streak";
 import type { AttemptFeedback, FeedbackColor } from "@/lib/scoring";
+import { track } from "@/lib/analytics";
 
 interface DailyData {
   imageUrl: string;
@@ -190,6 +191,7 @@ export default function Home() {
       setAttempts(newAttempts);
       setScore(newScore);
       if (data.direction) setDirection(data.direction);
+      track("attempt_fired", { attemptNumber, points: data.feedback.points, isCorrect: data.feedback.isCorrect });
       // Scroll history into view so the new attempt row is always visible
       setTimeout(() => {
         historyRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -213,6 +215,7 @@ export default function Home() {
         };
         setCompleted(true);
         setAnswer(revealedAnswer);
+        track("game_completed", { score: newScore, attempts: newAttempts.length, won: data.feedback.isCorrect, proMode });
         const newStreak = updateStreak(daily.challengeDate);
         setStreak(newStreak);
       }
@@ -262,6 +265,18 @@ export default function Home() {
     const next = !proMode;
     setProMode(next);
     try { localStorage.setItem("piccle_pro_mode", String(next)); } catch { /* ignore */ }
+  }
+
+  // Build a map of previously guessed values → best colour seen for that value
+  function buildGuessedMap(key: "shutter" | "aperture" | "focal"): Record<string, FeedbackColor> {
+    const rank = (c: FeedbackColor) => c === "green" ? 2 : c === "yellow" ? 1 : 0;
+    const map: Record<string, FeedbackColor> = {};
+    for (const a of attempts) {
+      const val = key === "focal" ? `${a.focal}mm` : a[key];
+      const existing = map[val];
+      if (!existing || rank(a.feedback[key]) > rank(existing)) map[val] = a.feedback[key];
+    }
+    return map;
   }
 
   // Show a hint when the last 2 attempts for a setting show no improvement (same or worse colour)
@@ -367,6 +382,11 @@ export default function Home() {
                 shotKey={attempts.length}
                 lastAttemptFeedback={attempts[attempts.length - 1]?.feedback}
                 hints={visibleHints}
+                guessedColors={{
+                  shutter:  buildGuessedMap("shutter"),
+                  aperture: buildGuessedMap("aperture"),
+                  focal:    buildGuessedMap("focal"),
+                }}
               />
             </section>
           </>
