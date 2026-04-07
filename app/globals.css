@@ -597,6 +597,12 @@ body {
   flex: 1;
 }
 
+/* Guessed-value colour feedback — applied via class so React's reconciler
+   updates them independently of framer-motion's internal style management */
+.dial-value.dial-value--green  { color: #22ff88; }
+.dial-value.dial-value--yellow { color: #ffb800; }
+.dial-value.dial-value--red    { color: #ff4d5a; }
+
 /* ─── Shutter button — the projector lamp ───────────────────────── */
 .shutter-btn {
   width: 100%;
@@ -1577,7 +1583,7 @@ body {
     grid-template-areas:
       "photo header"
       "photo card";
-    max-width: none;
+    max-width: 1200px;
     height: 100%;
     overflow: hidden;
   }
@@ -1610,4 +1616,34 @@ body {
 
   /* Hide the mobile drawer handle pill */
   .content-card::before { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WIDE DESKTOP  ≥ 1024px
+   Wider control panel, bumped font sizes, capped layout width
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+  .game-layout {
+    grid-template-columns: 1fr 500px;
+    max-width: 1320px;
+  }
+
+  /* ── Dial labels & hints ── */
+  .dial-label    { font-size: 11px; }
+  .dial-hint     { font-size: 11px; height: 18px; }
+  .dial-value    { font-size: clamp(16px, 1.6vw, 21px); }
+
+  /* ── Attempt history ── */
+  .attempt-drawer-label { font-size: 11px; }
+  .attempt-num          { font-size: 11px; }
+  .attempt-setting      { font-size: 13px; }
+  .attempt-box          { width: 50px; height: 32px; }
+
+  /* ── Header buttons (PRO, ?, streak) ── */
+  .info-btn     { font-size: 11px; }
+  .pro-mode-btn { font-size: 11px; }
+
+  /* ── SHOOT button ── */
+  .shoot-btn { font-size: 15px; letter-spacing: 0.24em; }
 }

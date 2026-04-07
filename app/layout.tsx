@@ -22,12 +22,45 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://piccle.vercel.app";
+
 export const metadata: Metadata = {
-  title: "PICCLE — Develop your eye.",
-  description: "One photo. Three numbers. Every day.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Piccle — Daily Photography Guessing Game",
+    template: "%s | Piccle",
+  },
+  description:
+    "Piccle is a free daily photography game. Study the photo, then guess the shutter speed, aperture, and focal length used to take it. New challenge every day — develop your eye.",
+  keywords: [
+    "piccle",
+    "piccle game",
+    "photography game",
+    "daily photo game",
+    "camera settings game",
+    "guess the settings",
+    "photo puzzle",
+    "wordle photography",
+    "aperture game",
+    "shutter speed game",
+  ],
+  authors: [{ name: "Piccle" }],
+  creator: "Piccle",
+  publisher: "Piccle",
+  robots: { index: true, follow: true },
   openGraph: {
-    title: "PICCLE",
-    description: "Develop your eye. One photo. Three numbers. Every day.",
+    type: "website",
+    siteName: "Piccle",
+    url: "/",
+    title: "Piccle — Daily Photography Guessing Game",
+    description:
+      "Study the photo. Guess the shutter speed, aperture, and focal length. New challenge every day.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Piccle — Daily Photography Guessing Game",
+    description:
+      "Study the photo. Guess the shutter speed, aperture, and focal length. New challenge every day.",
   },
 };
 
@@ -47,6 +80,28 @@ export default function RootLayout({
       className={`${bodoniModa.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: "Piccle",
+              url: SITE_URL,
+              description:
+                "A free daily photography guessing game. Study the photo, then guess the shutter speed, aperture, and focal length used to take it.",
+              applicationCategory: "GameApplication",
+              genre: "Puzzle",
+              operatingSystem: "Any",
+              browserRequirements: "Requires JavaScript",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+              },
+            }),
+          }}
+        />
         {children}
         <Analytics />
       </body>

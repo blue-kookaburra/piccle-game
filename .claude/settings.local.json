@@ -21,7 +21,8 @@
       "Bash(grep -n \"from \\\\\"@/components/Knob\\\\\"\" \"C:\\\\Users\\\\aaant\\\\OneDrive\\\\Desktop\\\\shutter-shaper/components\"/*.tsx \"C:\\\\Users\\\\aaant\\\\OneDrive\\\\Desktop\\\\shutter-shaper/app\"/**/*.tsx)",
       "Bash(rm:*)",
       "Bash(git checkout:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(curl -s \"http://localhost:3000/api/daily?date=2026-04-07\")"
     ]
   }
 }
