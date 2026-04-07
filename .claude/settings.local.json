@@ -13,7 +13,15 @@
       "Bash(curl -s http://localhost:3000/api/daily)",
       "Bash(curl -sI \"https://images.unsplash.com/photo-qSHMHyjL0Fc?w=1200&q=80\")",
       "Bash(node -e \"require\\(''@supabase/supabase-js''\\)\")",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(python3:*)",
+      "Skill(commit-commands:commit-push-pr)",
+      "Bash(gh pr create --title 'UI: share card dates, 5-tier skills, aperture dial fix, lightbox pinch-to-zoom' --body ':*)",
+      "Bash(gh pr:*)",
+      "Bash(grep -n \"from \\\\\"@/components/Knob\\\\\"\" \"C:\\\\Users\\\\aaant\\\\OneDrive\\\\Desktop\\\\shutter-shaper/components\"/*.tsx \"C:\\\\Users\\\\aaant\\\\OneDrive\\\\Desktop\\\\shutter-shaper/app\"/**/*.tsx)",
+      "Bash(rm:*)",
+      "Bash(git checkout:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

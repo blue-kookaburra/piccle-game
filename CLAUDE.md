@@ -171,3 +171,66 @@ Storage bucket: `shutter-shaper` (public read). Tables are publicly readable —
    ADMIN_PASSWORD=your-secret
    ```
 5. Use `/admin` to upload images and schedule daily challenges
+
+## Analytics
+
+Two layers of tracking are wired up:
+
+| Layer | Tool | Config |
+|-------|------|--------|
+| Page views / Web Vitals | Vercel Analytics | Enable in Vercel dashboard — zero code required |
+| Game events | PostHog | Add `NEXT_PUBLIC_POSTHOG_KEY=phc_xxx` to `.env.local`; get a key at posthog.com (free tier) |
+
+Events fired from the game:
+- `attempt_fired` — every shot (attemptNumber, points, isCorrect)
+- `game_completed` — on win/loss (score, attempts, won, proMode)
+- `share_text_copied` — SHARE button
+- `share_card_saved` — SAVE button
+
+If `NEXT_PUBLIC_POSTHOG_KEY` is absent, all event calls are silent no-ops.
+
+## Rate limiting
+
+`/api/daily` and `/api/submit` use an in-memory sliding-window limiter (`lib/rate-limit.ts`):
+- `/api/daily`: 60 req/min per IP
+- `/api/submit`: 20 req/min per IP
+
+**At scale (multi-instance Vercel deployment):** swap the Map in `lib/rate-limit.ts` for Upstash Redis using `@upstash/ratelimit`. The call signature is the same — only the backing store changes.
+
+## Monetisation roadmap (Phase 2)
+
+No premium features are built yet. The architecture is designed to add them without major rewrites.
+
+**Auth provider:** Supabase Auth (already in the project — just needs to be enabled)
+- Optional accounts: anonymous play always works; accounts unlock leaderboards, cross-device sync
+- Add magic-link + Google OAuth via `supabase.auth.signInWithOtp()` / `signInWithOAuth()`
+
+**Feature flags:** Add a `user_flags` table in Supabase, keyed by user ID. Check flags server-side in API routes.
+
+**First premium candidate:** `proMode` — currently a free localStorage toggle. To gate it behind a subscription, check the user's subscription status in `/api/submit` before accepting `proMode: true`.
+
+**Payment provider:** Stripe (works natively with Supabase + Vercel)
+- Monthly/yearly subscription via Stripe Checkout
+- Webhook → update `subscriptions` table in Supabase
+
+**New tables needed for Phase 2:**
+```sql
+CREATE TABLE user_games (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  date DATE NOT NULL,
+  score INTEGER,
+  attempts JSONB,
+  completed BOOLEAN,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE subscriptions (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id),
+  tier TEXT DEFAULT 'free',       -- 'free' | 'premium'
+  stripe_customer_id TEXT,
+  expires_at TIMESTAMPTZ
+);
+```
+
+**Ads (if needed):** Add a banner component that renders only when `user.tier === 'free'`. Carbon Ads or Google AdSense both work. Gate with the same subscription check.

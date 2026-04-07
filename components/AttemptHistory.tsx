@@ -10,25 +10,18 @@ interface AttemptHistoryProps {
   pendingAttempt?: { shutter: string; aperture: string; focal: number } | null;
 }
 
+import { FEEDBACK_COLORS } from "@/lib/colors";
+
 type FeedbackColor = "green" | "yellow" | "red";
 
-const TEXT_COLOR: Record<FeedbackColor, string> = {
-  green:  "#22ff88",
-  yellow: "#ffb800",
-  red:    "#ff4d5a",
-};
-
-const DOT_COLOR: Record<FeedbackColor, string> = {
-  green:  "#22ff88",
-  yellow: "#ffb800",
-  red:    "#ff4d5a",
-};
+const TEXT_COLOR = FEEDBACK_COLORS;
+const DOT_COLOR  = FEEDBACK_COLORS;
 
 function rowAccent(attempt: Attempt): string {
   const vals = [attempt.feedback.shutter, attempt.feedback.aperture, attempt.feedback.focal];
-  if (vals.includes("red"))    return "#ff4d5a";
-  if (vals.includes("yellow")) return "#ffb800";
-  return "#22ff88";
+  if (vals.includes("red"))    return FEEDBACK_COLORS.red;
+  if (vals.includes("yellow")) return FEEDBACK_COLORS.yellow;
+  return FEEDBACK_COLORS.green;
 }
 
 // One attempt represented as 3 coloured dots (or empty rings)

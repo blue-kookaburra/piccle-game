@@ -39,13 +39,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Supabase not configured" }, { status: 503 });
   }
 
-  const file = formData.get("file") as File;
-  const shutter_speed = formData.get("shutter_speed") as string;
-  const aperture = formData.get("aperture") as string;
-  const focal_length = Number(formData.get("focal_length"));
-  const description = formData.get("description") as string;
-  const credit = formData.get("credit") as string;
-  const assign_date = formData.get("assign_date") as string;
+  const file         = formData.get("file") as File;
+  const assign_date  = formData.get("assign_date") as string;
+
+  // Game settings
+  const shutter_speed          = formData.get("shutter_speed") as string;
+  const aperture               = formData.get("aperture") as string;
+  const focal_length           = Number(formData.get("focal_length"));
+  const shutter_speed_original = (formData.get("shutter_speed_original") as string) || null;
+  const focal_length_original  = formData.get("focal_length_original") ? Number(formData.get("focal_length_original")) : null;
+
+  // Camera info
+  const camera = (formData.get("camera") as string) || null;
+  const iso    = formData.get("iso") ? Number(formData.get("iso")) : null;
+
+  // Attribution
+  const photographer   = (formData.get("photographer") as string)   || null;
+  const credit         = (formData.get("credit") as string)         || null;
+  const unsplash_url   = (formData.get("unsplash_url") as string)   || null;
+  const completion_link = (formData.get("completion_link") as string) || null;
+
+  // Editorial
+  const description = (formData.get("description") as string) || null;
+  const comment     = (formData.get("comment") as string)     || null;
 
   // Validate file type and size
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
@@ -82,8 +98,16 @@ export async function POST(req: NextRequest) {
       shutter_speed,
       aperture,
       focal_length,
-      description,
+      shutter_speed_original,
+      focal_length_original,
+      camera,
+      iso,
+      photographer,
       credit,
+      unsplash_url,
+      completion_link,
+      description,
+      comment,
     })
     .select("id")
     .single();

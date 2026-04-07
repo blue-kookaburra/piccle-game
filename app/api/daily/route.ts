@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTestChallenge } from "@/lib/test-data";
+import { isRateLimited } from "@/lib/rate-limit";
 
 // Must not be cached — the response changes every day at midnight.
 export const dynamic = "force-dynamic";
@@ -7,6 +8,11 @@ export const dynamic = "force-dynamic";
 // Returns today's image + challenge number — NO EXIF data.
 // EXIF is only returned by /api/submit on completion.
 export async function GET(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anon";
+  if (isRateLimited(`daily:${ip}`, 60, 60_000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   // Use the client's local date (sent as ?date=YYYY-MM-DD) so the challenge
   // resets at midnight in the player's timezone, not midnight UTC.
   const rawDate = req.nextUrl.searchParams.get("date") ?? new Date().toISOString().split("T")[0];
