@@ -224,7 +224,7 @@ export default function ResultCard({
           )}
           {solveRate !== undefined && (
             <span className={`solve-rate${solveRate < 30 ? " solve-rate--rare" : ""}`}>
-              {solveRate < 30 ? `only ${solveRate}% solved` : `${solveRate}% solved`}
+              {solveRate < 30 ? `only ${solveRate}% of players solved today` : `${solveRate}% of players solved today`}
             </span>
           )}
         </div>
