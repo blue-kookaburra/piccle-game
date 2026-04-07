@@ -216,12 +216,11 @@ function DialPicker({
           style={{ "--dial-active-color": dialColor } as React.CSSProperties}
         >‹</button>
         <motion.span
-          className="dial-value"
+          className={`dial-value${currentFeedback ? ` dial-value--${currentFeedback}` : ""}`}
           key={value}
           initial={{ opacity: 0.5, y: -4 }}
           animate={{ opacity: 1,   y:  0 }}
           transition={{ duration: 0.1 }}
-          style={currentFeedback ? { color: FEEDBACK_COLOR[currentFeedback] } : undefined}
         >
           {value}
         </motion.span>
