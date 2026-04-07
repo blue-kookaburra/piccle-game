@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, JetBrains_Mono, Outfit } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -45,7 +46,10 @@ export default function RootLayout({
       lang="en"
       className={`${bodoniModa.variable} ${jetbrainsMono.variable} ${outfit.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
