@@ -67,6 +67,55 @@ function splitCSVLine(line) {
   return result;
 }
 
+// ─── Shutter speed normaliser ────────────────────────────────────────────────
+// Excel corrupts shutter speeds in two ways:
+//   "1/8"    → "1-Aug"  (day-month date, reversible)
+//   "1/1600" → "Jan-00" (near-zero date serial, NOT reversible)
+// fixShutterSpeed reverses the first case and returns null for the second,
+// allowing the caller to fall back to the raw EXIF value and re-snap.
+
+const MONTH_TO_NUM = {
+  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+};
+
+function fixShutterSpeed(val) {
+  if (!val) return null;
+  const s = val.trim();
+  // "Mon-00" pattern → unrecoverable Excel date serial artefact
+  if (/^[A-Za-z]{3}-\d{2}$/.test(s)) return null;
+  // "1-Aug" → "1/8" etc.
+  const m = s.match(/^(\d+)-([A-Za-z]{3})$/);
+  if (m) {
+    const num = MONTH_TO_NUM[m[2].toLowerCase()];
+    if (num) return `${m[1]}/${num}`;
+  }
+  return s;
+}
+
+// Snap a raw shutter-speed string (e.g. "1/1600") to the nearest canonical value.
+const SHUTTER_SPEEDS = [
+  "1/8000", "1/4000", "1/2000", "1/1000", "1/500", "1/250",
+  "1/125",  "1/60",   "1/30",   "1/15",   "1/8",   "1/4",  "1/2",
+  "1s", "2s", "4s", "8s", "15s", "30s", "60s",
+];
+
+function shutterToSeconds(s) {
+  if (s.includes("/")) return 1 / Number(s.split("/")[1]);
+  return Number(s.replace("s", ""));
+}
+
+function snapShutterSpeed(val) {
+  if (!val) return null;
+  const secs = shutterToSeconds(val);
+  if (!isFinite(secs) || secs <= 0) return null;
+  return SHUTTER_SPEEDS.reduce((best, candidate) => {
+    const d = Math.abs(Math.log2(secs) - Math.log2(shutterToSeconds(candidate)));
+    const bd = Math.abs(Math.log2(secs) - Math.log2(shutterToSeconds(best)));
+    return d < bd ? candidate : best;
+  });
+}
+
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 function addDays(dateStr, n) {
   const d = new Date(dateStr + "T00:00:00Z");
@@ -130,7 +179,7 @@ for (let i = 0; i < rows.length; i++) {
   // Build the image record
   const imageRecord = {
     storage_url:            usableLink,
-    shutter_speed:          row.ss || row.shutter_speed || null,  // snapped game value
+    shutter_speed:          fixShutterSpeed(row.ss) ?? snapShutterSpeed(fixShutterSpeed(row.shutter_speed) ?? row.shutter_speed),  // snapped game value
     aperture:               row.aperture ? `f/${row.aperture}` : null,
     focal_length:           row.fl ? parseInt(row.fl) : null,
     description:            row.location || null,
@@ -140,7 +189,7 @@ for (let i = 0; i < rows.length; i++) {
     iso:                    row.iso ? parseInt(row.iso) : null,
     photographer:           row.photographer || null,
     location:               row.location || null,
-    shutter_speed_original: row.shutter_speed || null,   // raw EXIF (unsnapped)
+    shutter_speed_original: fixShutterSpeed(row.shutter_speed) || null,   // raw EXIF (unsnapped)
     focal_length_original:  row.focal_length ? parseInt(row.focal_length) : null,
     comment:                row.comment || null,
     completion_link:        row.completion_link || null,

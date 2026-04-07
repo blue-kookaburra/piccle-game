@@ -1,18 +1,31 @@
 // Fetches EXIF data from Unsplash API for a list of photo page URLs.
 //
 // Usage:
-//   node scripts/fetch-exif.mjs YOUR_ACCESS_KEY [input.csv]
+//   node scripts/fetch-exif.mjs YOUR_ACCESS_KEY [--input input.csv] [--output output.csv]
 //
 // Input CSV must have a column named "link" containing Unsplash page URLs:
 //   https://unsplash.com/photos/some-description-AbCdEfGhI
 //
-// Defaults to scripts/links.csv if no input file specified.
-// Output: scripts/output.csv
+// --input  defaults to scripts/links.csv
+// --output defaults to scripts/output.csv
+//          (if only --input is set, output is auto-named: links2.csv → output-links2.csv)
 
 import { readFileSync, writeFileSync } from "fs";
+import { basename, dirname, join } from "path";
 
-const API_KEY = process.argv[2];
-const INPUT_FILE = process.argv[3] || "scripts/links.csv";
+const args = process.argv.slice(2);
+
+function getFlag(flag) {
+  const i = args.indexOf(flag);
+  return i !== -1 ? args[i + 1] : null;
+}
+
+const API_KEY    = args[0];
+const INPUT_FILE = getFlag("--input") || "scripts/links.csv";
+
+// Auto-derive output name from input: scripts/links2.csv → scripts/output-links2.csv
+const defaultOutput = join(dirname(INPUT_FILE), "output-" + basename(INPUT_FILE));
+const OUTPUT_FILE = getFlag("--output") || defaultOutput;
 
 // ─── Load .env.local for ANTHROPIC_API_KEY ────────────────────────────────────
 let ANTHROPIC_API_KEY = null;
@@ -28,7 +41,7 @@ try {
 } catch { /* .env.local missing — comments will be skipped */ }
 
 if (!API_KEY) {
-  console.error("Usage: node scripts/fetch-exif.mjs YOUR_ACCESS_KEY [input.csv]");
+  console.error("Usage: node scripts/fetch-exif.mjs YOUR_ACCESS_KEY [--input input.csv] [--output output.csv]");
   process.exit(1);
 }
 
@@ -388,7 +401,7 @@ function csvCell(value) {
 }
 
 const csv = outputRows.map(row => row.map(csvCell).join(",")).join("\n");
-writeFileSync("scripts/output.csv", csv, "utf8");
+writeFileSync(OUTPUT_FILE, csv, "utf8");
 
 console.log(`\n${successCount} rows written, ${skipCount} skipped.`);
-console.log("Output: scripts/output.csv");
+console.log(`Output: ${OUTPUT_FILE}`);
