@@ -41,16 +41,31 @@ export default function AdminPage() {
   const [status, setStatus]   = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Resize image to max 2048px on longest side, JPEG 85% — keeps files under 4MB
+  async function resizeImage(src: File): Promise<Blob> {
+    const MAX_PX = 2048;
+    const bitmap = await createImageBitmap(src);
+    const { width, height } = bitmap;
+    const scale = Math.min(1, MAX_PX / Math.max(width, height));
+    const canvas = document.createElement("canvas");
+    canvas.width  = Math.round(width  * scale);
+    canvas.height = Math.round(height * scale);
+    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    return new Promise(resolve => canvas.toBlob(b => resolve(b!), "image/jpeg", 0.85));
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!file) return;
 
     setLoading(true);
-    setStatus(null);
+    setStatus("Resizing image…");
+    const resized = await resizeImage(file);
+    setStatus("Uploading…");
 
     const formData = new FormData();
     formData.append("password", password);
-    formData.append("file", file);
+    formData.append("file", resized, file.name.replace(/\.[^.]+$/, ".jpg"));
     formData.append("assign_date", assignDate);
 
     // Game settings
@@ -74,30 +89,36 @@ export default function AdminPage() {
     if (description) formData.append("description", description);
     if (comment)     formData.append("comment", comment);
 
-    const res  = await fetch("/api/admin/upload", { method: "POST", body: formData });
-    const data = await res.json();
+    try {
+      const res  = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      let data: { error?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON response */ }
 
-    if (res.ok) {
-      setStatus("✅ Image uploaded and scheduled!");
-      setFile(null);
-      setAssignDate("");
-      setShutter(SHUTTER_SPEEDS[6]);
-      setAperture(APERTURES[7]);
-      setFocal(String(FOCAL_LENGTHS[9]));
-      setShutterOriginal("");
-      setFocalOriginal("");
-      setCamera("");
-      setIso("");
-      setPhotographer("");
-      setCredit("");
-      setUnsplashUrl("");
-      setCompletionLink("");
-      setDescription("");
-      setComment("");
-    } else {
-      setStatus(`❌ ${data.error}`);
+      if (res.ok) {
+        setStatus("✅ Image uploaded and scheduled!");
+        setFile(null);
+        setAssignDate("");
+        setShutter(SHUTTER_SPEEDS[6]);
+        setAperture(APERTURES[7]);
+        setFocal(String(FOCAL_LENGTHS[9]));
+        setShutterOriginal("");
+        setFocalOriginal("");
+        setCamera("");
+        setIso("");
+        setPhotographer("");
+        setCredit("");
+        setUnsplashUrl("");
+        setCompletionLink("");
+        setDescription("");
+        setComment("");
+      } else {
+        setStatus(`❌ ${data.error ?? `Server error ${res.status}`}`);
+      }
+    } catch (err) {
+      setStatus(`❌ ${err instanceof Error ? err.message : "Unexpected error"}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   if (!authed) {

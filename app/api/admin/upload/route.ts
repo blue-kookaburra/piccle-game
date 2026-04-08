@@ -71,8 +71,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "File too large. Maximum size is 20 MB." }, { status: 400 });
   }
 
-  const { createClient } = await import("@/lib/supabase/server");
-  const supabase = await createClient();
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+  );
 
   // Derive extension from MIME type, not filename
   const mimeToExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
