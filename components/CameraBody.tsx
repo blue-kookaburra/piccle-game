@@ -256,7 +256,7 @@ function DialPicker({
       </div>
 
       {/* Direction hint — shown after 2 consecutive non-green attempts */}
-      <div className="dial-hint" aria-live="polite">
+      <div key={hint || "empty"} className="dial-hint" aria-live="polite">
         {hint ? HINT_LABELS[hint] ?? hint : ""}
       </div>
     </div>
