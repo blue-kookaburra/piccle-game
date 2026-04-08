@@ -42,9 +42,6 @@ interface AnswerData {
 
 const MAX_ATTEMPTS = 5;
 
-const DEFAULT_SHUTTER = Math.floor(SHUTTER_SPEEDS.length / 2);
-const DEFAULT_APERTURE = Math.floor(APERTURES.length / 2);
-const DEFAULT_FOCAL = Math.floor(FOCAL_LENGTHS.length / 2);
 
 // Best colour seen so far for one setting across all past attempts
 function bestColor(attempts: Attempt[], key: "shutter" | "aperture" | "focal"): FeedbackColor {
@@ -80,9 +77,9 @@ function animateDial(
 export default function Home() {
   const [daily, setDaily] = useState<DailyData | null>(null);
   const [loadError, setLoadError] = useState(false);
-  const [shutterIdx, setShutterIdx] = useState(DEFAULT_SHUTTER);
-  const [apertureIdx, setApertureIdx] = useState(DEFAULT_APERTURE);
-  const [focalIdx, setFocalIdx] = useState(DEFAULT_FOCAL);
+  const [shutterIdx, setShutterIdx] = useState(() => Math.floor(Math.random() * SHUTTER_SPEEDS.length));
+  const [apertureIdx, setApertureIdx] = useState(() => Math.floor(Math.random() * APERTURES.length));
+  const [focalIdx, setFocalIdx] = useState(() => Math.floor(Math.random() * FOCAL_LENGTHS.length));
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [completed, setCompleted] = useState(false);
   const [score, setScore] = useState(0);
