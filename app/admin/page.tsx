@@ -74,30 +74,36 @@ export default function AdminPage() {
     if (description) formData.append("description", description);
     if (comment)     formData.append("comment", comment);
 
-    const res  = await fetch("/api/admin/upload", { method: "POST", body: formData });
-    const data = await res.json();
+    try {
+      const res  = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      let data: { error?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON response */ }
 
-    if (res.ok) {
-      setStatus("✅ Image uploaded and scheduled!");
-      setFile(null);
-      setAssignDate("");
-      setShutter(SHUTTER_SPEEDS[6]);
-      setAperture(APERTURES[7]);
-      setFocal(String(FOCAL_LENGTHS[9]));
-      setShutterOriginal("");
-      setFocalOriginal("");
-      setCamera("");
-      setIso("");
-      setPhotographer("");
-      setCredit("");
-      setUnsplashUrl("");
-      setCompletionLink("");
-      setDescription("");
-      setComment("");
-    } else {
-      setStatus(`❌ ${data.error}`);
+      if (res.ok) {
+        setStatus("✅ Image uploaded and scheduled!");
+        setFile(null);
+        setAssignDate("");
+        setShutter(SHUTTER_SPEEDS[6]);
+        setAperture(APERTURES[7]);
+        setFocal(String(FOCAL_LENGTHS[9]));
+        setShutterOriginal("");
+        setFocalOriginal("");
+        setCamera("");
+        setIso("");
+        setPhotographer("");
+        setCredit("");
+        setUnsplashUrl("");
+        setCompletionLink("");
+        setDescription("");
+        setComment("");
+      } else {
+        setStatus(`❌ ${data.error ?? `Server error ${res.status}`}`);
+      }
+    } catch (err) {
+      setStatus(`❌ ${err instanceof Error ? err.message : "Unexpected error"}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   if (!authed) {
