@@ -112,12 +112,12 @@ export default function RootLayout({
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           })(window, document, "clarity", "script", "w85xr8yj2o");
         `}</Script>
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-RW61MVQ7YQ" strategy="afterInteractive" />
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-93SHB0646Y" strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-RW61MVQ7YQ');
+          gtag('config', 'G-93SHB0646Y');
         `}</Script>
       </body>
     </html>
