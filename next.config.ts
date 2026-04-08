@@ -15,10 +15,10 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "img-src 'self' https://*.supabase.co https://images.unsplash.com data: blob:",
-              "connect-src 'self' https://*.supabase.co",
+              "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://*.clarity.ms",
               "font-src 'self' https://fonts.gstatic.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.clarity.ms",
             ].join("; "),
           },
         ],
