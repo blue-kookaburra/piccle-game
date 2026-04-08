@@ -8,6 +8,7 @@ import CameraBody, { type DirectionHints } from "@/components/CameraBody";
 import AttemptHistory from "@/components/AttemptHistory";
 import ResultCard from "@/components/ResultCard";
 import AboutModal from "@/components/AboutModal";
+import WelcomeModal from "@/components/WelcomeModal";
 import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 import { getGameState, saveGameState, type Attempt, type RevealedAnswer } from "@/lib/game-state";
 import { getStreak, updateStreak, type StreakState } from "@/lib/streak";
@@ -92,16 +93,20 @@ export default function Home() {
   const [firing, setFiring] = useState(false);
   const [pendingAttempt, setPendingAttempt] = useState<{ shutter: string; aperture: string; focal: number } | null>(null);
   const [showAbout, setShowAbout] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const [direction, setDirection] = useState<DirectionHints | null>(null);
   const [proMode, setProMode] = useState(false);
   const dialAnimatedRef = useRef(false);
   const historyRef = useRef<HTMLElement>(null);
 
-  // Load pro mode preference from localStorage
+  // Load pro mode preference + first-visit flag from localStorage
   useEffect(() => {
     try {
       setProMode(localStorage.getItem("piccle_pro_mode") === "true");
+      if (!localStorage.getItem("piccle_welcomed")) {
+        setShowWelcome(true);
+      }
     } catch { /* ignore */ }
   }, []);
 
@@ -391,6 +396,13 @@ export default function Home() {
       </div>
 
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
+      <WelcomeModal
+        isOpen={showWelcome}
+        onClose={() => {
+          try { localStorage.setItem("piccle_welcomed", "1"); } catch { /* ignore */ }
+          setShowWelcome(false);
+        }}
+      />
 
       {/* SHOOT flash — projector lamp sensation */}
       {showFlash && <div className="shoot-flash" aria-hidden="true" />}
