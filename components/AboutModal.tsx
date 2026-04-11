@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onTutorial: () => void;
 }
 
-export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
+export default function AboutModal({ isOpen, onClose, onTutorial }: AboutModalProps) {
   useEffect(() => {
     if (!isOpen) return;
     function onKey(e: KeyboardEvent) {
@@ -96,6 +97,16 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                       it as a clue.
                     </p>
                   </div>
+                </div>
+
+                <div className="about-tutorial-cta">
+                  <p className="about-tutorial-text">New to photography? Learn the key settings in your camera.</p>
+                  <button
+                    className="about-tutorial-btn"
+                    onClick={() => { onClose(); onTutorial(); }}
+                  >
+                    PLAY THE TUTORIAL
+                  </button>
                 </div>
               </section>
 

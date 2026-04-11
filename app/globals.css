@@ -1837,3 +1837,410 @@ body {
   /* ── SHOOT button ── */
   .shoot-btn { font-size: 15px; letter-spacing: 0.24em; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TUTORIAL MODE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Full-screen overlay sits above everything */
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--zone-0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header strip */
+.tutorial-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 8px;
+  flex-shrink: 0;
+}
+
+.tutorial-skip-btn,
+.tutorial-back-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--zone-7);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  min-width: 52px; /* keeps counter centred */
+}
+.tutorial-skip-btn { text-align: right; }
+.tutorial-back-btn { text-align: left; }
+.tutorial-skip-btn:hover,
+.tutorial-back-btn:hover { color: var(--zone-9); }
+.tutorial-back-btn:disabled { color: var(--zone-3); cursor: default; }
+
+.tutorial-step-counter {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--zone-mid);
+}
+
+/* Chapter motion container */
+.tutorial-chapter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Text / Done panels ── */
+.tutorial-text-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 28px 40px;
+  text-align: center;
+  gap: 20px;
+}
+
+.tutorial-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 900;
+  color: var(--zone-9);
+  line-height: 1.15;
+  margin: 0;
+}
+
+.tutorial-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--zone-7);
+  max-width: 340px;
+  margin: 0;
+}
+
+/* ── Interactive chapters ── */
+.tutorial-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 40svh;
+  flex-shrink: 0;
+  background: var(--zone-1);
+  overflow: hidden;
+}
+
+.tutorial-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ISO overlay — bottom-right of image */
+.tutorial-iso-overlay {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--zone-9);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 3px 8px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+/* ISO chapter: make the ISO value pop (amber, larger) */
+.tutorial-iso-overlay--highlighted {
+  color: var(--amber-slide);
+  font-size: 14px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 5px 10px;
+}
+
+/* Chapter body text — sits between image and dials */
+.tutorial-image-wrap + .tutorial-body {
+  padding: 10px 20px 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Dials wrapper — removes top padding CameraBody normally gets */
+.tutorial-dials-wrap {
+  flex-shrink: 0;
+}
+
+.tutorial-dials-wrap .camera-controls {
+  padding-top: 6px;
+}
+
+/* Mobile: small gap at top of controls col */
+.tutorial-controls-spacer {
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Spin hint — sits above the dials, centred */
+.tutorial-touch-hint {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--zone-7);
+  margin: 0;
+  text-align: center;
+  width: 100%;
+  padding: 6px 16px 2px;
+  flex-shrink: 0;
+}
+
+/* Footer area — only holds the NEXT button now */
+.tutorial-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 16px 20px;
+  gap: 8px;
+  min-height: 52px;
+}
+
+.tutorial-next-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--zone-0);
+  background: var(--hot-pixel);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  cursor: pointer;
+}
+.tutorial-next-btn:hover { opacity: 0.9; }
+
+.tutorial-next-btn--large {
+  font-size: 13px;
+  padding: 14px 36px;
+}
+
+/* Footnote box — used in the "done" chapter */
+.tutorial-footnote {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--zone-7);
+  background: var(--zone-1);
+  border: 1px solid var(--zone-3);
+  border-radius: 10px;
+  padding: 12px 18px;
+  max-width: 340px;
+  text-align: center;
+}
+
+/* ── Locked dial ── */
+.dial-picker--locked {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.dial-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--zone-7);
+  pointer-events: none;
+}
+
+/* dial-drag-zone needs relative positioning for the lock overlay */
+.dial-drag-zone {
+  position: relative;
+}
+
+/* ── Tutorial image/controls columns (mobile: stacked, desktop: side-by-side) ── */
+.tutorial-image-col {
+  flex-shrink: 0;
+}
+
+.tutorial-controls-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* On mobile, the image-wrap inside tutorial-image-col keeps its existing height */
+.tutorial-image-col .tutorial-image-wrap {
+  height: 40svh;
+}
+
+/* Body text in interactive chapters — centred, sits directly above the dials */
+.tutorial-body--interactive {
+  width: 100%;
+  max-width: none;
+  padding: 10px 20px 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--amber-slide);
+}
+
+@media (min-width: 768px) {
+  /* Tutorial: header spans full width, then image | controls side by side */
+  .tutorial-overlay {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr 420px;
+  }
+
+  .tutorial-header {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--zone-2);
+  }
+
+  /* On desktop, interactive chapters go side-by-side */
+  .tutorial-chapter {
+    grid-column: 1 / -1;
+  }
+
+  .tutorial-chapter--interactive {
+    flex-direction: row;
+    overflow: hidden;
+  }
+
+  /* Image col fills the left side */
+  .tutorial-image-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tutorial-image-col .tutorial-image-wrap {
+    height: 100%;
+  }
+
+  /* Controls col is fixed width matching desktop game card */
+  .tutorial-controls-col {
+    width: 420px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--zone-2);
+    background: var(--zone-0);
+    justify-content: flex-start;
+    padding-top: 24px;
+  }
+
+  .tutorial-controls-spacer {
+    height: 0;
+  }
+
+  .tutorial-footer {
+    margin-top: 0;
+    min-height: 0;
+    padding: 8px 16px 0;
+  }
+
+  .tutorial-body--interactive {
+    padding: 16px 28px 4px;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  /* Text-only and done panels: span both columns, centered */
+  .tutorial-text-panel {
+    grid-column: 1 / -1;
+  }
+
+  /* ISO overlay: bigger on desktop */
+  .tutorial-iso-overlay {
+    font-size: 13px;
+    padding: 5px 12px;
+  }
+
+  .tutorial-iso-overlay--highlighted {
+    font-size: 18px;
+    padding: 8px 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tutorial-controls-col {
+    width: 500px;
+  }
+}
+
+/* ── About modal: tutorial CTA ── */
+.about-tutorial-cta {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--zone-1);
+  border-radius: 10px;
+  border: 1px solid var(--zone-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.about-tutorial-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--zone-7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.about-tutorial-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--zone-0);
+  background: var(--hot-pixel);
+  border: none;
+  border-radius: 6px;
+  padding: 9px 20px;
+  cursor: pointer;
+}
+.about-tutorial-btn:hover { opacity: 0.88; }
+
+/* ── Welcome modal: tutorial CTA ── */
+.welcome-tutorial-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--zone-1);
+  border-radius: 10px;
+  border: 1px solid var(--zone-3);
+}
+
+.welcome-tutorial-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--zone-7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.welcome-tutorial-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--zone-0);
+  background: var(--hot-pixel);
+  border: none;
+  border-radius: 6px;
+  padding: 9px 20px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.welcome-tutorial-btn:hover { opacity: 0.88; }

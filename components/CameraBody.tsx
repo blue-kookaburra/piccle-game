@@ -155,6 +155,9 @@ interface DialPickerProps {
   feedback?: "green" | "yellow" | "red";           // last-shot colour for glow animation
   guessedColors?: Record<string, "green" | "yellow" | "red">; // map of guessed values → best colour
   hint?: string;
+  locked?: boolean;                                 // tutorial: greyed out, no interaction
+  allowedIndices?: number[];                        // tutorial: only snap to these indices
+  onJump?: (idx: number) => void;                   // tutorial: direct-index setter used with allowedIndices
 }
 
 // Maps hint string to a display label with arrow indicating which way to drag
@@ -170,27 +173,41 @@ const HINT_LABELS: Record<string, string> = {
 function DialPicker({
   label, value, index, total, ringTotal, uid, majorEvery, shotKey, dialColor,
   onDecrement, onIncrement, disabled, feedback, guessedColors, hint,
+  locked, allowedIndices, onJump,
 }: DialPickerProps) {
   // Colour for the currently displayed value: R/Y/G if guessed, else undefined (→ dial colour)
   const currentFeedback = guessedColors?.[value] as "green" | "yellow" | "red" | undefined;
   const dragRef = useRef<{ lastX: number; accumulated: number } | null>(null);
 
   function step(dir: 1 | -1) {
-    const next = index + dir;
-    if (next >= 0 && next < total) {
-      dir === -1 ? onDecrement() : onIncrement();
-      navigator.vibrate?.(8);
+    if (allowedIndices && onJump) {
+      // Tutorial mode: only snap between the allowed indices
+      const sorted = [...allowedIndices].sort((a, b) => a - b);
+      const curPos = sorted.indexOf(index);
+      const nextPos = curPos === -1
+        ? (dir === 1 ? 0 : sorted.length - 1)
+        : curPos + dir;
+      if (nextPos >= 0 && nextPos < sorted.length) {
+        onJump(sorted[nextPos]);
+        navigator.vibrate?.(8);
+      }
+    } else {
+      const next = index + dir;
+      if (next >= 0 && next < total) {
+        dir === -1 ? onDecrement() : onIncrement();
+        navigator.vibrate?.(8);
+      }
     }
   }
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled) return;
+    if (disabled || locked) return;
     dragRef.current = { lastX: e.clientX, accumulated: 0 };
     (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!dragRef.current || disabled) return;
+    if (!dragRef.current || disabled || locked) return;
     const delta = e.clientX - dragRef.current.lastX;
     dragRef.current.accumulated += delta;
     dragRef.current.lastX = e.clientX;
@@ -204,14 +221,14 @@ function DialPicker({
   }
 
   return (
-    <div className="dial-picker">
+    <div className={`dial-picker${locked ? " dial-picker--locked" : ""}`}>
       <span className="dial-label" style={{ color: dialColor + "cc" }}>{label}</span>
 
       <div className="dial-value-row">
         <button
           className="dial-arrow"
           onClick={() => step(-1)}
-          disabled={disabled || index === 0}
+          disabled={disabled || locked || index === 0}
           aria-label={`Decrease ${label}`}
           style={{ "--dial-active-color": dialColor } as React.CSSProperties}
         >‹</button>
@@ -227,7 +244,7 @@ function DialPicker({
         <button
           className="dial-arrow"
           onClick={() => step(1)}
-          disabled={disabled || index === total - 1}
+          disabled={disabled || locked || index === total - 1}
           aria-label={`Increase ${label}`}
           style={{ "--dial-active-color": dialColor } as React.CSSProperties}
         >›</button>
@@ -240,7 +257,7 @@ function DialPicker({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        style={{ touchAction: "pan-y", cursor: disabled ? "default" : "ew-resize", userSelect: "none" }}
+        style={{ touchAction: "pan-y", cursor: (disabled || locked) ? "default" : "ew-resize", userSelect: "none" }}
       >
         <HalfDial
           index={index}
@@ -253,6 +270,14 @@ function DialPicker({
           feedback={feedback}
           currentFeedback={currentFeedback}
         />
+        {locked && (
+          <div className="dial-lock-overlay" aria-hidden="true">
+            <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+              <rect x="2" y="9" width="12" height="10" rx="2" fill="currentColor" opacity="0.7"/>
+              <path d="M4 9V6a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.7"/>
+            </svg>
+          </div>
+        )}
       </div>
 
       {/* Direction hint — shown after 2 consecutive non-green attempts */}
@@ -316,12 +341,17 @@ interface CameraBodyProps {
     aperture: Record<string, "green" | "yellow" | "red">;
     focal:    Record<string, "green" | "yellow" | "red">;
   };
+  // Tutorial mode
+  lockedDials?: ("shutter" | "aperture" | "focal")[];
+  tutorialIndices?: { shutter?: number[]; aperture?: number[]; focal?: number[] };
+  hideFire?: boolean;
 }
 
 export default function CameraBody({
   shutterIdx, apertureIdx, focalIdx,
   onShutterChange, onApertureChange, onFocalChange,
   onFire, disabled, firing, attemptsLeft, lastAttemptFeedback, shotKey, hints, guessedColors,
+  lockedDials, tutorialIndices, hideFire,
 }: CameraBodyProps) {
   return (
     <div className="camera-controls">
@@ -343,6 +373,9 @@ export default function CameraBody({
             feedback={lastAttemptFeedback?.shutter}
             guessedColors={guessedColors?.shutter}
             hint={hints?.shutter ?? undefined}
+            locked={lockedDials?.includes("shutter")}
+            allowedIndices={tutorialIndices?.shutter}
+            onJump={tutorialIndices?.shutter ? onShutterChange : undefined}
           />
           <div className="dial-divider" />
           {/* Aperture — amber — 28 values, majorEvery=3 marks full stops, ringTotal=30 ensures even 36° spacing */}
@@ -362,6 +395,9 @@ export default function CameraBody({
             feedback={lastAttemptFeedback?.aperture}
             guessedColors={guessedColors?.aperture}
             hint={hints?.aperture ?? undefined}
+            locked={lockedDials?.includes("aperture")}
+            allowedIndices={tutorialIndices?.aperture}
+            onJump={tutorialIndices?.aperture ? onApertureChange : undefined}
           />
           <div className="dial-divider" />
           {/* Focal length — coral — not even stops, alternate major/minor */}
@@ -380,27 +416,32 @@ export default function CameraBody({
             feedback={lastAttemptFeedback?.focal}
             guessedColors={guessedColors?.focal}
             hint={hints?.focal ?? undefined}
+            locked={lockedDials?.includes("focal")}
+            allowedIndices={tutorialIndices?.focal}
+            onJump={tutorialIndices?.focal ? onFocalChange : undefined}
           />
         </div>
       </div>
 
-      <motion.button
-        className="shutter-btn"
-        onClick={onFire}
-        disabled={disabled || firing}
-        whileTap={{ scale: 0.975 }}
-      >
-        {firing ? (
-          <span className="shutter-btn-label">—</span>
-        ) : (
-          <>
-            <span className="shutter-btn-label">SHOOT</span>
-            <div className="shot-counter-section">
-              <ShotCounter value={attemptsLeft} />
-            </div>
-          </>
-        )}
-      </motion.button>
+      {!hideFire && (
+        <motion.button
+          className="shutter-btn"
+          onClick={onFire}
+          disabled={disabled || firing}
+          whileTap={{ scale: 0.975 }}
+        >
+          {firing ? (
+            <span className="shutter-btn-label">—</span>
+          ) : (
+            <>
+              <span className="shutter-btn-label">SHOOT</span>
+              <div className="shot-counter-section">
+                <ShotCounter value={attemptsLeft} />
+              </div>
+            </>
+          )}
+        </motion.button>
+      )}
     </div>
   );
 }

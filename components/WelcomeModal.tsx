@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onTutorial: () => void;
 }
 
-export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
+export default function WelcomeModal({ isOpen, onClose, onTutorial }: WelcomeModalProps) {
   useEffect(() => {
     if (!isOpen) return;
     function onKey(e: KeyboardEvent) {
@@ -65,18 +66,15 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                 </span>
               </div>
 
-              {/* Instagram */}
-              <div className="welcome-ig-block">
-                <p className="welcome-ig-text">New to photography?</p>
-                <a
-                  href="https://www.instagram.com/piccle.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="welcome-ig-link"
+              {/* Tutorial CTA */}
+              <div className="welcome-tutorial-block">
+                <p className="welcome-tutorial-text">New to photography? Learn the key settings in your camera.</p>
+                <button
+                  className="welcome-tutorial-btn"
+                  onClick={() => { onClose(); onTutorial(); }}
                 >
-                  @piccle.io on Instagram →
-                </a>
-                <p className="welcome-ig-subtext">Photography tips to sharpen your skills</p>
+                  PLAY THE TUTORIAL
+                </button>
               </div>
 
               {/* CTA */}

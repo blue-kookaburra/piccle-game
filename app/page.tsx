@@ -9,6 +9,7 @@ import AttemptHistory from "@/components/AttemptHistory";
 import ResultCard from "@/components/ResultCard";
 import AboutModal from "@/components/AboutModal";
 import WelcomeModal from "@/components/WelcomeModal";
+import TutorialMode from "@/components/TutorialMode";
 import { SHUTTER_SPEEDS, APERTURES, FOCAL_LENGTHS } from "@/lib/camera-values";
 import { getGameState, saveGameState, type Attempt, type RevealedAnswer } from "@/lib/game-state";
 import { getStreak, updateStreak, type StreakState } from "@/lib/streak";
@@ -95,6 +96,7 @@ export default function Home() {
   const [pendingAttempt, setPendingAttempt] = useState<{ shutter: string; aperture: string; focal: number } | null>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [isTutorial, setIsTutorial] = useState(false);
   const isPreviewRef = useRef(false);
   const [isPreview, setIsPreview] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
@@ -416,14 +418,28 @@ export default function Home() {
         )}
       </div>
 
-      <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
+      <AboutModal
+        isOpen={showAbout}
+        onClose={() => setShowAbout(false)}
+        onTutorial={() => { setShowAbout(false); setIsTutorial(true); }}
+      />
       <WelcomeModal
         isOpen={showWelcome}
         onClose={() => {
           try { localStorage.setItem("piccle_welcomed", "1"); } catch { /* ignore */ }
           setShowWelcome(false);
         }}
+        onTutorial={() => {
+          try { localStorage.setItem("piccle_welcomed", "1"); } catch { /* ignore */ }
+          setShowWelcome(false);
+          setIsTutorial(true);
+        }}
       />
+      {isTutorial && (
+        <TutorialMode
+          onFinish={() => setIsTutorial(false)}
+        />
+      )}
 
       {/* SHOOT flash — projector lamp sensation */}
       {showFlash && <div className="shoot-flash" aria-hidden="true" />}
