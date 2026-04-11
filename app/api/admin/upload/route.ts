@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
   // Editorial
   const description = (formData.get("description") as string) || null;
   const comment     = (formData.get("comment") as string)     || null;
+  const tag         = (formData.get("tag") as string)         || null;
 
   // Validate file type and size
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
@@ -126,7 +127,7 @@ export async function POST(req: NextRequest) {
 
   const { error: scheduleError } = await supabase
     .from("daily_challenges")
-    .insert({ date: assign_date, image_id: imageRow.id });
+    .insert({ date: assign_date, image_id: imageRow.id, tag });
 
   if (scheduleError) {
     return NextResponse.json({ error: scheduleError.message }, { status: 500 });

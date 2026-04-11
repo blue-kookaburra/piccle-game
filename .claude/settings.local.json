@@ -22,7 +22,13 @@
       "Bash(rm:*)",
       "Bash(git checkout:*)",
       "Bash(git rm:*)",
-      "Bash(curl -s \"http://localhost:3000/api/daily?date=2026-04-07\")"
+      "Bash(curl -s \"http://localhost:3000/api/daily?date=2026-04-07\")",
+      "Bash(npx vercel:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(xargs -I{} echo \"PR #{} already exists\")"
     ]
   }
 }

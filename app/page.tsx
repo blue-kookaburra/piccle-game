@@ -24,6 +24,7 @@ interface DailyData {
   photographer?: string;
   description?: string;
   credit?: string;
+  tag?: string;
 }
 
 interface AnswerData {
@@ -94,25 +95,33 @@ export default function Home() {
   const [pendingAttempt, setPendingAttempt] = useState<{ shutter: string; aperture: string; focal: number } | null>(null);
   const [showAbout, setShowAbout] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const isPreviewRef = useRef(false);
+  const [isPreview, setIsPreview] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const [direction, setDirection] = useState<DirectionHints | null>(null);
   const [proMode, setProMode] = useState(false);
   const dialAnimatedRef = useRef(false);
   const historyRef = useRef<HTMLElement>(null);
 
-  // Load pro mode preference + first-visit flag from localStorage
+  // Load localStorage flags, detect preview mode, then fetch the daily challenge.
+  // Merged into one effect so preview date is known before the fetch fires.
   useEffect(() => {
     try {
       setProMode(localStorage.getItem("piccle_pro_mode") === "true");
-      if (!localStorage.getItem("piccle_welcomed")) {
-        setShowWelcome(true);
-      }
+      if (!localStorage.getItem("piccle_welcomed")) setShowWelcome(true);
     } catch { /* ignore */ }
-  }, []);
 
-  useEffect(() => {
-    const localDate = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
-    fetch(`/api/daily?date=${localDate}`)
+    const params = new URLSearchParams(window.location.search);
+    const pDate = params.get("preview");
+    if (pDate && /^\d{4}-\d{2}-\d{2}$/.test(pDate)) {
+      isPreviewRef.current = true;
+      setIsPreview(true);
+    }
+
+    const dateToFetch = isPreviewRef.current
+      ? pDate!
+      : new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
+    fetch(`/api/daily?date=${dateToFetch}`)
       .then((r) => { if (!r.ok) throw new Error("no challenge"); return r.json(); })
       .then((data: DailyData) => setDaily(data))
       .catch(() => setLoadError(true));
@@ -120,16 +129,18 @@ export default function Home() {
 
   useEffect(() => {
     if (!daily) return;
-    const saved = getGameState(daily.challengeDate);
-    if (saved.attempts.length > 0) {
-      setAttempts(saved.attempts);
-      setScore(saved.score);
-      setCompleted(saved.completed);
-      if (saved.completed && saved.revealedAnswer) {
-        setAnswer(saved.revealedAnswer);
+    if (!isPreviewRef.current) {
+      const saved = getGameState(daily.challengeDate);
+      if (saved.attempts.length > 0) {
+        setAttempts(saved.attempts);
+        setScore(saved.score);
+        setCompleted(saved.completed);
+        if (saved.completed && saved.revealedAnswer) {
+          setAnswer(saved.revealedAnswer);
+        }
       }
+      setStreak(getStreak());
     }
-    setStreak(getStreak());
   }, [daily]);
 
   // Animate dials to correct answer when game completes
@@ -168,6 +179,7 @@ export default function Home() {
         aperture: bestColor(attempts, "aperture"),
         focal:    bestColor(attempts, "focal"),
       } : undefined,
+      ...(isPreviewRef.current && { preview: true }),
     };
 
     try {
@@ -218,17 +230,21 @@ export default function Home() {
         setCompleted(true);
         setAnswer(revealedAnswer);
         track("game_completed", { score: newScore, attempts: newAttempts.length, won: data.feedback.isCorrect, proMode });
-        const newStreak = updateStreak(daily.challengeDate);
-        setStreak(newStreak);
+        if (!isPreviewRef.current) {
+          const newStreak = updateStreak(daily.challengeDate);
+          setStreak(newStreak);
+        }
       }
 
-      saveGameState({
-        date: daily.challengeDate,
-        attempts: newAttempts,
-        completed: isOver,
-        score: newScore,
-        revealedAnswer,
-      });
+      if (!isPreviewRef.current) {
+        saveGameState({
+          date: daily.challengeDate,
+          attempts: newAttempts,
+          completed: isOver,
+          score: newScore,
+          revealedAnswer,
+        });
+      }
     } catch (err) {
       console.error("Submit failed", err);
       setPendingAttempt(null);
@@ -301,6 +317,9 @@ export default function Home() {
 
   return (
     <main className="game-layout">
+      {isPreview && (
+        <div className="preview-banner">PREVIEW — results not recorded</div>
+      )}
       <header className="game-header">
         <PiccleLogo className="game-logo" />
         <div className="header-right">
@@ -337,6 +356,7 @@ export default function Home() {
           camera={daily.camera}
           iso={daily.iso}
           photographer={daily.photographer}
+          tag={daily.tag}
         />
       </section>
 
@@ -360,6 +380,7 @@ export default function Home() {
               comment={answer.comment}
               completionLink={answer.completionLink}
               proMode={proMode}
+              tag={daily.tag}
             />
           </section>
         ) : (

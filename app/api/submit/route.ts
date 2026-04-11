@@ -42,6 +42,7 @@ interface SubmitBody {
   focal: number;
   attemptNumber: number;
   previousBestColors?: { shutter: string; aperture: string; focal: string };
+  preview?: boolean;
 }
 
 export async function POST(req: NextRequest) {
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body: SubmitBody = await req.json();
-  const { date, shutter, aperture, focal, attemptNumber, previousBestColors } = body;
+  const { date, shutter, aperture, focal, attemptNumber, previousBestColors, preview } = body;
 
   // --- Input validation ---
   if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -166,7 +167,7 @@ export async function POST(req: NextRequest) {
 
   // Increment daily_stats in Supabase (if connected) when game ends
   let solveRate: number | undefined;
-  if (shouldReveal && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (shouldReveal && !preview && process.env.NEXT_PUBLIC_SUPABASE_URL) {
     try {
       const { createClient } = await import("@/lib/supabase/server");
       const supabase = await createClient();
