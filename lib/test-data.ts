@@ -14,6 +14,7 @@ export interface ChallengeData {
   camera?: string;
   iso?: number;
   photographer?: string;
+  tag?: string;
 }
 
 export interface AnswerData {

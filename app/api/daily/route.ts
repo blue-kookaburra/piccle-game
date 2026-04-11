@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabase
     .from("daily_challenges")
-    .select("id, date, image_id, images(id, storage_url, description, credit, camera, iso, photographer)")
+    .select("id, date, tag, image_id, images(id, storage_url, description, credit, camera, iso, photographer)")
     .eq("date", today)
     .single();
 
@@ -95,5 +95,6 @@ export async function GET(req: NextRequest) {
     photographer: image.photographer,
     description: image.description,
     credit: image.credit,
+    tag: (data as { tag?: string }).tag ?? null,
   });
 }

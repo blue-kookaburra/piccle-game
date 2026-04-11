@@ -28,13 +28,14 @@ interface ResultCardProps {
   comment?: string;
   completionLink?: string;
   proMode?: boolean;
+  tag?: string;
 }
 
 export default function ResultCard({
   score, attempts, answer, streak, challengeNumber, challengeDate,
   shutterOriginal, apertureOriginal, focalOriginal,
   description, credit, solveRate, unsplashUrl, comment, completionLink,
-  proMode,
+  proMode, tag,
 }: ResultCardProps) {
   const [displayScore, setDisplayScore] = useState(0);
   const [flashed, setFlashed]           = useState(false);
@@ -120,6 +121,11 @@ export default function ResultCard({
       <div className={`result-outcome${won ? " result-outcome--won" : " result-outcome--lost"}`}>
         {won ? `Correct in ${shotCount} shot${shotCount === 1 ? "" : "s"}!` : "Better luck next time"}
       </div>
+      {tag && (
+        <p style={{ color: "#e2b35a", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "center", margin: "-4px 0 8px", fontFamily: "var(--font-mono)" }}>
+          {tag}
+        </p>
+      )}
 
       {/* ── Attempt history ── */}
       <AttemptHistory attempts={attempts} maxAttempts={5} />
@@ -246,6 +252,22 @@ export default function ResultCard({
           {downloading ? "saving..." : "SAVE"}
         </motion.button>
       </div>
+
+      {/* ── Instagram follow ── */}
+      <a
+        className="ig-follow"
+        href="https://www.instagram.com/piccle.io"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {/* Instagram logo mark */}
+        <svg className="ig-icon" viewBox="0 0 24 24" fill="none" stroke="var(--hot-pixel)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="5"/>
+          <circle cx="17.5" cy="6.5" r="1" fill="var(--hot-pixel)" stroke="none"/>
+        </svg>
+        <span className="ig-follow-text">Follow <strong>@piccle.io</strong> for photography tips</span>
+      </a>
     </motion.div>
   );
 }

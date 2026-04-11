@@ -10,6 +10,7 @@ interface ImageViewerProps {
   camera?: string;
   iso?: number;
   photographer?: string;
+  tag?: string;
 }
 
 // Strip duplicate Make prefix: "Nikon Corporation Nikon D750" → "Nikon D750"
@@ -38,6 +39,7 @@ export default function ImageViewer({
   camera,
   iso,
   photographer,
+  tag,
 }: ImageViewerProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -153,8 +155,20 @@ export default function ImageViewer({
 
         <div className="image-overlay">
           <div className="overlay-top">
-            {/* Frame number — top left, understated */}
-            <span className="challenge-badge">Frame {challengeNumber}</span>
+            {tag && (
+              <span style={{
+                background: "rgba(0,0,0,0.55)",
+                color: "#e2b35a",
+                fontSize: 10,
+                letterSpacing: "0.08em",
+                padding: "3px 8px",
+                borderRadius: 20,
+                textTransform: "uppercase" as const,
+                fontFamily: "var(--font-mono)",
+              }}>
+                {tag}
+              </span>
+            )}
           </div>
 
           <div className="overlay-bottom">

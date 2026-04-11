@@ -1022,6 +1022,38 @@ body {
 
 .share-btn--secondary:hover { background: rgba(255,255,255,0.03); }
 
+.ig-follow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 18px 20px 4px;
+  color: var(--zone-6);
+  text-decoration: none;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ig-follow:hover { color: var(--zone-8); }
+
+.ig-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.ig-follow-text {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.ig-follow-text strong {
+  font-weight: 600;
+  color: var(--zone-8);
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    LOADING & ERROR
    ═══════════════════════════════════════════════════════════════════ */
@@ -1555,6 +1587,21 @@ body {
   font-size: 12px;
   color: var(--zone-7);
   line-height: 1.6;
+}
+
+/* ─── Preview mode banner ────────────────────────────────────────── */
+.preview-banner {
+  background: var(--zone-2);
+  border-bottom: 1px solid var(--zone-3);
+  color: var(--hot-pixel);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  padding: 5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
