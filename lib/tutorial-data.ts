@@ -1,6 +1,5 @@
 // Tutorial chapter definitions.
-// After shooting and uploading to Supabase Storage (shutter-shaper/tutorial/),
-// replace each "FILL_IN" with the full public URL for that image.
+// Images served via Supabase image transforms (/render/image/) for fast loading.
 
 export type TutorialChapterType = "text" | "aperture" | "shutter" | "iso" | "focal" | "done";
 
@@ -17,6 +16,9 @@ export interface TutorialChapterDef {
   footnote?: string; // rendered in a separate box (used in "done" chapter)
   images?: TutorialImageEntry[]; // exactly 3 for interactive chapters
 }
+
+const BASE = "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/render/image/public/shutter-shaper/tutorial";
+const OPT  = "?width=900&quality=80";
 
 export const TUTORIAL_CHAPTERS: TutorialChapterDef[] = [
   // ── Intro ─────────────────────────────────────────────────────────────────
@@ -37,11 +39,11 @@ export const TUTORIAL_CHAPTERS: TutorialChapterDef[] = [
   {
     type: "aperture",
     title: "Try the aperture dial",
-    body: "Spin left or right to see depth of field change - look at the words on the books in the background.",
+    body: "Spin left or right to see depth of field change - look at the words on the book in the background.",
     images: [
-      { value: "f/3.2", imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf3.2%201-60%20250.JPG", iso: 250 },
-      { value: "f/8",   imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf8%201-60%201600.JPG", iso: 1600 },
-      { value: "f/16",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf16%201-60%206400.JPG", iso: 6400 },
+      { value: "f/3.2", imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f3.2.JPG",  iso: 250 },
+      { value: "f/8",   imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f8.JPG",   iso: 1600 },
+      { value: "f/16",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f16.JPG",  iso: 6400 },
     ],
   },
 
@@ -58,9 +60,9 @@ export const TUTORIAL_CHAPTERS: TutorialChapterDef[] = [
     title: "Try the shutter dial",
     body: "Spin left or right to see motion blur change.",
     images: [
-      { value: "1/1000", imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf5.6%201-500%206400.JPG", iso: 6400 },
-      { value: "1/60",   imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf5.6%201-60%20800.JPG", iso: 800 },
-      { value: "1/4",    imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf5.6%201-8%20125.JPG", iso: 125 },
+      { value: "1/1000", imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35%201-500s.JPG", iso: 6400 },
+      { value: "1/60",   imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35%201-30s.JPG",   iso: 800 },
+      { value: "1/4",    imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35%201-4s.JPG",    iso: 125 },
     ],
   },
 
@@ -77,9 +79,9 @@ export const TUTORIAL_CHAPTERS: TutorialChapterDef[] = [
     title: "Watch the ISO",
     body: "Spin the aperture dial again — this time, watch how the ISO number in the bottom-left climbs as the aperture narrows.",
     images: [
-      { value: "f/3.2", imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf3.2%201-60%20250.JPG", iso: 250 },
-      { value: "f/8",   imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf8%201-60%201600.JPG", iso: 1600 },
-      { value: "f/16",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf16%201-60%206400.JPG", iso: 6400 },
+      { value: "f/3.2", imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f3.2.JPG",  iso: 250 },
+      { value: "f/8",   imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f8.JPG",   iso: 1600 },
+      { value: "f/16",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f16.JPG",  iso: 6400 },
     ],
   },
 
@@ -94,11 +96,11 @@ export const TUTORIAL_CHAPTERS: TutorialChapterDef[] = [
   {
     type: "focal",
     title: "Try the focal length dial",
-    body: "Spin left or right to see how the field of view changes. Note that in these images, the photographer has tried to keep two-thirds of the frame filled with the Christmas decoration, and so had to move towards the subject when shooting at 18mm, and moved further away when shooting at 105mm.",
+    body: "Spin left or right to see how the field of view changes. Note that in these images, the photographer has tried to keep half of the frame filled with the Christmas decoration, and so had to move towards the subject when shooting at 18mm, and moved further away when shooting at 85mm.",
     images: [
-      { value: "18mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/18mmf8%201-60%202500.jpg", iso: 2000 },
-      { value: "35mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35mmf8%201-60%201600.JPG", iso: 2000 },
-      { value: "105mm", imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/105mmf8%201-60%202500.JPG", iso: 2000 },
+      { value: "18mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/12.JPG",   iso: 2000 },
+      { value: "35mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f8.JPG",   iso: 2000 },
+      { value: "85mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/85.JPG",  iso: 2000 },
     ],
   },
 
@@ -115,4 +117,4 @@ export const TUTORIAL_CHAPTERS: TutorialChapterDef[] = [
 // These correspond to the 3 images above.
 export const TUTORIAL_APERTURE_INDICES = [10, 18, 24]; // f/3.2, f/8, f/16
 export const TUTORIAL_SHUTTER_INDICES  = [3, 7, 11];  // 1/1000, 1/60, 1/4
-export const TUTORIAL_FOCAL_INDICES    = [4, 8, 14]; // 18mm, 35mm, 105mm
+export const TUTORIAL_FOCAL_INDICES    = [4, 8, 13]; // 18mm, 35mm, 85mm
