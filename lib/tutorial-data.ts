@@ -98,9 +98,9 @@ export const TUTORIAL_CHAPTERS: TutorialChapterDef[] = [
     title: "Try the focal length dial",
     body: "Spin left or right to see how the field of view changes. Note that in these images, the photographer has tried to keep half of the frame filled with the Christmas decoration, and so had to move towards the subject when shooting at 18mm, and moved further away when shooting at 85mm.",
     images: [
-      { value: "18mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/12.JPG",   iso: 2000 },
-      { value: "35mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f8.JPG",   iso: 2000 },
-      { value: "85mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/85.JPG",  iso: 2000 },
+      { value: "18mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/12.JPG",   iso: 1000 },
+      { value: "35mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/35f8.JPG",   iso: 1000 },
+      { value: "85mm",  imageUrl: "https://sujqmtbhydpohxeuuukw.supabase.co/storage/v1/object/public/shutter-shaper/tutorial/85.JPG",  iso: 1000 },
     ],
   },
 
