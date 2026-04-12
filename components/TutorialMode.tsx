@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CameraBody from "@/components/CameraBody";
 import {
@@ -37,6 +37,16 @@ const DEFAULT_APERTURE = TUTORIAL_APERTURE_INDICES[1];
 const DEFAULT_FOCAL    = TUTORIAL_FOCAL_INDICES[1];
 
 export default function TutorialMode({ onFinish }: TutorialModeProps) {
+  // Preload all tutorial images as soon as the tutorial opens
+  useEffect(() => {
+    TUTORIAL_CHAPTERS.forEach(chapter => {
+      chapter.images?.forEach(img => {
+        const el = new Image();
+        el.src = img.imageUrl;
+      });
+    });
+  }, []);
+
   const [chapterIdx, setChapterIdx] = useState(0);
   const [dialPos, setDialPos] = useState(1); // 0 | 1 | 2 — start at middle value
   const [hasTouched, setHasTouched] = useState(false);
